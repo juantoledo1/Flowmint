@@ -1,102 +1,105 @@
 const express = require('express');
 const router = express.Router();
-const mysqlConnect = require('../database/database');
-const jwt = require('jsonwebtoken');
-
-// Verificar token JWT
-function verificarToken(req, res, next) {
-    const bearer = req.headers['authorization'];
-    if (typeof bearer !== 'undefined') {
-        const token = bearer.split(" ")[1];
-        jwt.verify(token, process.env.JWT_SECRET, (error, decoded) => {
-            if (error) {
-                res.status(403).json({ status: false, mensaje: "Token inválido" });
-            } else {
-                req.token = token;
-                req.usuarioId = decoded.id;
-                next();
-            }
-        });
-    } else {
-        res.status(403).json({ status: false, mensaje: "No hay token de autorización" });
-    }
-}
-
-// Verificar rol - función auxiliar para obtener el rol del usuario
-function obtenerRolUsuario(usuarioId, callback) {
-    mysqlConnect.query(
-        'SELECT rol_id FROM usuarios WHERE usuario_id = ?', 
-        [usuarioId], 
-        (error, resultados) => {
-            if (error) {
-                callback(error, null);
-            } else if (resultados.length === 0) {
-                callback(new Error("Usuario no encontrado"), null);
-            } else {
-                callback(null, resultados[0].rol_id);
-            }
-        }
-    );
-}
-
-// Middleware para verificar rol
-function verificarRol(rolesPermitidos) {
-    return (req, res, next) => {
-        if (!req.usuarioId) {
-            return res.status(403).json({ status: false, mensaje: "No autenticado" });
-        }
-
-        obtenerRolUsuario(req.usuarioId, (error, rolUsuario) => {
-            if (error) {
-                console.log('Error al verificar rol del usuario:', error);
-                return res.status(500).json({ status: false, mensaje: "Error al verificar rol del usuario" });
-            }
-
-            if (rolesPermitidos.includes(rolUsuario)) {
-                req.rolUsuario = rolUsuario;
-                next();
-            } else {
-                res.status(403).json({ status: false, mensaje: "No tienes permiso para realizar esta acción" });
-            }
-        });
-    };
-}
-
-// Middleware específico para usuarios con rol de administrador (rol_id = 1)
-const esAdmin = verificarRol([1]);
-
-// Middleware para usuarios con rol de empleado o administrador (rol_id = 1 o 2)
-const esEmpleado = verificarRol([1, 2]);
-
-const bodyParser = require('body-parser');
-
-const app = express();
-app.use(bodyParser.json());
-
-router.use(express.json());
+const pool = require('../database/database');
+const { verificarRol, esAdmin, esEmpleado } = require('../middleware/rolMiddleware');
 
 // Listar todos los servicios - Permitido para usuarios autenticados
-router.get('/listar_servicios', verificarToken, esEmpleado, (req, res) => {
-    mysqlConnect.query('SELECT * FROM servicios', (error, registros) => {
+/**
+ * @swagger
+ * /servicios/listar_servicios:
+ *   get:
+ *     tags: [Servicios]
+ *     summary: Listar todos los servicios
+ *     description: Obtiene una lista de todos los servicios
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: Authorization
+ *         in: header
+ *         description: Token JWT de autorización
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Lista de servicios
+ *         schema:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               id_servicio:
+ *                 type: integer
+ *               nombre:
+ *                 type: string
+ *               descripcion:
+ *                 type: string
+ *               precio:
+ *                 type: number
+ *       403:
+ *         description: Acceso no autorizado
+ */
+router.get('/listar_servicios', esEmpleado, (req, res) => {
+    const query = 'SELECT * FROM servicios';
+    pool.query(query, (error, registros) => {
         if (error) {
             console.log('Error en la base de datos', error);
             res.status(500).json({ status: false, mensaje: "Error en la base de datos" });
         } else {
-            res.json(registros);
+            res.json(registros.rows);
         }
     });
 });
 
 // Listar un servicio por ID - Permitido para usuarios autenticados
-router.get('/listar_servicio/:id', verificarToken, esEmpleado, (req, res) => {
+/**
+ * @swagger
+ * /servicios/listar_servicio/{id}:
+ *   get:
+ *     tags: [Servicios]
+ *     summary: Obtener un servicio por ID
+ *     description: Obtiene un servicio específico por su ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: id
+ *         description: ID del servicio
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: Authorization
+ *         in: header
+ *         description: Token JWT de autorización
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Servicio encontrado
+ *         schema:
+ *           type: object
+ *           properties:
+ *             id_servicio:
+ *               type: integer
+ *             nombre:
+ *               type: string
+ *             descripcion:
+ *               type: string
+ *             precio:
+ *               type: number
+ *       403:
+ *         description: Acceso no autorizado
+ *       404:
+ *         description: Servicio no encontrado
+ */
+router.get('/listar_servicio/:id', esEmpleado, (req, res) => {
     const { id } = req.params;
-    mysqlConnect.query('SELECT * FROM servicios WHERE id_servicio = ?', [id], (error, registros) => {
+    const query = 'SELECT * FROM servicios WHERE id_servicio = $1';
+    pool.query(query, [id], (error, registros) => {
         if (error) {
             console.log('Error en la base de datos', error);
             res.status(500).json({ status: false, mensaje: "Error en la base de datos" });
         } else {
-            if (registros.length > 0) {
-                res.json(registros);
+            if (registros.rows.length > 0) {
+                res.json(registros.rows);
             } else {
                 res.json({ status: false, mensaje: "El ID del servicio no existe" });
             }
@@ -105,9 +108,49 @@ router.get('/listar_servicio/:id', verificarToken, esEmpleado, (req, res) => {
 });
 
 // Crear un nuevo servicio - Solo para administradores
-router.post('/crear_servicio', verificarToken, esAdmin, (req, res) => {
+/**
+ * @swagger
+ * /servicios/crear_servicio:
+ *   post:
+ *     tags: [Servicios]
+ *     summary: Crear un nuevo servicio
+ *     description: Crea un nuevo servicio en el sistema
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: servicioData
+ *         description: Datos del servicio
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Corte de Cabello"
+ *             descripcion:
+ *               type: string
+ *               example: "Corte de cabello para caballero"
+ *             precio:
+ *               type: number
+ *               example: 15.50
+ *     responses:
+ *       200:
+ *         description: Servicio creado exitosamente
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: boolean
+ *             mensaje:
+ *               type: string
+ *       403:
+ *         description: Acceso no autorizado
+ */
+router.post('/crear_servicio', esAdmin, (req, res) => {
     const { nombre, descripcion, precio } = req.body;
-    mysqlConnect.query('INSERT INTO servicios (nombre, descripcion, precio) VALUES (?, ?, ?)', [nombre, descripcion, precio], (error, registros) => {
+    const query = 'INSERT INTO servicios (nombre, descripcion, precio) VALUES ($1, $2, $3)';
+    pool.query(query, [nombre, descripcion, precio], (error, registros) => {
         if (error) {
             console.log('Error en la base de datos', error);
             res.status(500).json({ status: false, mensaje: "Error en la base de datos" });
@@ -118,15 +161,62 @@ router.post('/crear_servicio', verificarToken, esAdmin, (req, res) => {
 });
 
 // Actualizar un servicio por ID - Solo para administradores
-router.put('/actualizar_servicio/:id', verificarToken, esAdmin, (req, res) => {
+/**
+ * @swagger
+ * /servicios/actualizar_servicio/{id}:
+ *   put:
+ *     tags: [Servicios]
+ *     summary: Actualizar un servicio
+ *     description: Actualiza un servicio específico por su ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: id
+ *         description: ID del servicio
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: servicioData
+ *         description: Datos del servicio
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             nombre:
+ *               type: string
+ *               example: "Corte de Cabello"
+ *             descripcion:
+ *               type: string
+ *               example: "Corte de cabello para caballero"
+ *             precio:
+ *               type: number
+ *               example: 15.50
+ *     responses:
+ *       200:
+ *         description: Servicio actualizado exitosamente
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: boolean
+ *             mensaje:
+ *               type: string
+ *       403:
+ *         description: Acceso no autorizado
+ *       404:
+ *         description: Servicio no encontrado
+ */
+router.put('/actualizar_servicio/:id', esAdmin, (req, res) => {
     const { id } = req.params;
     const { nombre, descripcion, precio } = req.body;
-    mysqlConnect.query('UPDATE servicios SET nombre = ?, descripcion = ?, precio = ? WHERE id_servicio = ?', [nombre, descripcion, precio, id], (error, registros) => {
+    const query = 'UPDATE servicios SET nombre = $1, descripcion = $2, precio = $3 WHERE id_servicio = $4';
+    pool.query(query, [nombre, descripcion, precio, id], (error, registros) => {
         if (error) {
             console.log('Error en la base de datos', error);
             res.status(500).json({ status: false, mensaje: "Error en la base de datos" });
         } else {
-            if (registros.affectedRows > 0) {
+            if (registros.rowCount > 0) {
                 res.json({ status: true, mensaje: "El servicio se actualizó correctamente" });
             } else {
                 res.json({ status: false, mensaje: "El ID del servicio no existe" });
@@ -136,14 +226,50 @@ router.put('/actualizar_servicio/:id', verificarToken, esAdmin, (req, res) => {
 });
 
 // Eliminar un servicio por ID - Solo para administradores
-router.delete('/eliminar_servicio/:id', verificarToken, esAdmin, (req, res) => {
+/**
+ * @swagger
+ * /servicios/eliminar_servicio/{id}:
+ *   delete:
+ *     tags: [Servicios]
+ *     summary: Eliminar un servicio
+ *     description: Elimina un servicio específico por su ID
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: id
+ *         description: ID del servicio
+ *         in: path
+ *         required: true
+ *         type: integer
+ *       - name: Authorization
+ *         in: header
+ *         description: Token JWT de autorización
+ *         required: true
+ *         type: string
+ *     responses:
+ *       200:
+ *         description: Servicio eliminado exitosamente
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: boolean
+ *             mensaje:
+ *               type: string
+ *       403:
+ *         description: Acceso no autorizado
+ *       404:
+ *         description: Servicio no encontrado
+ */
+router.delete('/eliminar_servicio/:id', esAdmin, (req, res) => {
     const { id } = req.params;
-    mysqlConnect.query('DELETE FROM servicios WHERE id_servicio = ?', [id], (error, registros) => {
+    const query = 'DELETE FROM servicios WHERE id_servicio = $1';
+    pool.query(query, [id], (error, registros) => {
         if (error) {
             console.log('Error en la base de datos', error);
             res.status(500).json({ status: false, mensaje: "Error en la base de datos" });
         } else {
-            if (registros.affectedRows > 0) {
+            if (registros.rowCount > 0) {
                 res.json({ status: true, mensaje: "El servicio se eliminó correctamente" });
             } else {
                 res.json({ status: false, mensaje: "El ID del servicio no existe" });

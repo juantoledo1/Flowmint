@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Form, Button, Container, Alert, Row, Col, InputGroup } from 'react-bootstrap';
-import { login } from '../servicios/servicios';
+import { login, googleLogin } from '../servicios/servicios';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({ user: '', pass: '' });
@@ -17,7 +17,7 @@ const Login = () => {
         if (isLoggedIn) {
             navigate('/dashboard');
         }
-        
+
         // Limpiar campos de login al cargar el componente
         setCredentials({ user: '', pass: '' });
     }, [navigate]);
@@ -49,11 +49,28 @@ const Login = () => {
         }
     };
 
+    const handleGoogleLogin = async () => {
+        try {
+            // En una implementación real, usarías la biblioteca de Google Sign-In
+            // Por ahora, solo mostraremos un mensaje para ilustrar la funcionalidad
+            alert('Funcionalidad de Google Sign-In aún no implementada completamente. Se requiere la biblioteca de Google y configuración de credenciales.');
+            
+            // En una implementación completa sería algo como:
+            /*
+            const googleUser = await google.accounts.id.revoke('user_id', (response) => {
+                console.log('User revoked access', response);
+            });
+            */
+        } catch (error) {
+            setError('Ocurrió un error al intentar iniciar sesión con Google.');
+        }
+    };
+
     return (
-        <Container className="mt-5 d-flex justify-content-center align-items-center ">
-            <Row className="w-100 ">
+        <Container className="mt-5 d-flex justify-content-center align-items-center">
+            <Row className="w-100">
                 <Col md={6} lg={4} className="mx-auto">
-                    <h2 className="text-center">Iniciar sesión</h2>
+                    <h2 className="text-center">Iniciar sesión en FlowMint</h2>
                     {error && <Alert variant="danger">{error}</Alert>}
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3">
@@ -90,8 +107,16 @@ const Login = () => {
                                 </Button>
                             </InputGroup>
                         </Form.Group>
-                        <Button variant="primary" type="submit" className="w-100">
+                        <Button variant="primary" type="submit" className="w-100 mb-3">
                             Iniciar sesión
+                        </Button>
+                        
+                        <Button 
+                            variant="outline-danger" 
+                            className="w-100 mb-3" 
+                            onClick={handleGoogleLogin}
+                        >
+                            <i className="bi bi-google"></i> Iniciar sesión con Google
                         </Button>
                     </Form>
                     <p className="mt-3 text-center">

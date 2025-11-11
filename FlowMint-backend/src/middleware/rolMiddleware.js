@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const jwt = require('jsonwebtoken');
-const mysqlConnect = require('../database/database');
+const pool = require('../database/database');
 
 // Middleware para verificar el rol del usuario
 const verificarRol = (rolesPermitidos) => {
@@ -18,31 +18,28 @@ const verificarRol = (rolesPermitidos) => {
             }
 
             // Obtener información del usuario desde la base de datos para verificar el rol
-            mysqlConnect.query(
-                'SELECT rol_id FROM usuarios WHERE usuario_id = ?', 
-                [decoded.id], 
-                (error, resultados) => {
-                    if (error) {
-                        console.log('Error al verificar rol del usuario', error);
-                        return res.status(500).json({ status: false, mensaje: "Error al verificar rol del usuario" });
-                    }
-
-                    if (resultados.length === 0) {
-                        return res.status(403).json({ status: false, mensaje: "Usuario no encontrado" });
-                    }
-
-                    const rolUsuario = resultados[0].rol_id;
-
-                    // Verificar si el rol del usuario está en la lista de roles permitidos
-                    if (rolesPermitidos.includes(rolUsuario)) {
-                        req.usuarioId = decoded.id;
-                        req.rolUsuario = rolUsuario;
-                        next();
-                    } else {
-                        res.status(403).json({ status: false, mensaje: "No tienes permiso para realizar esta acción" });
-                    }
+            const query = 'SELECT rol_id FROM usuarios WHERE usuario_id = $1';
+            pool.query(query, [decoded.id], (error, resultados) => {
+                if (error) {
+                    console.log('Error al verificar rol del usuario', error);
+                    return res.status(500).json({ status: false, mensaje: "Error al verificar rol del usuario" });
                 }
-            );
+
+                if (resultados.rows.length === 0) {
+                    return res.status(403).json({ status: false, mensaje: "Usuario no encontrado" });
+                }
+
+                const rolUsuario = resultados.rows[0].rol_id;
+
+                // Verificar si el rol del usuario está en la lista de roles permitidos
+                if (rolesPermitidos.includes(rolUsuario)) {
+                    req.usuarioId = decoded.id;
+                    req.rolUsuario = rolUsuario;
+                    next();
+                } else {
+                    res.status(403).json({ status: false, mensaje: "No tienes permiso para realizar esta acción" });
+                }
+            });
         });
     };
 };
@@ -53,8 +50,12 @@ const esAdmin = verificarRol([1]);
 // Middleware para usuarios con rol de empleado o administrador (rol_id = 1 o 2)
 const esEmpleado = verificarRol([1, 2]);
 
+// Middleware para usuarios con rol de lectura (todos excepto clientes, por ejemplo rol_id = 1, 2 o 3)
+const esLectura = verificarRol([1, 2]);
+
 module.exports = {
     verificarRol,
     esAdmin,
-    esEmpleado
+    esEmpleado,
+    esLectura
 };

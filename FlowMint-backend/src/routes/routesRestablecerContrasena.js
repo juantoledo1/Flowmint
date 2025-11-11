@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const nodemailer = require('nodemailer');
-const mysqlConnection = require('../database/database'); // Ajusta la ruta según tu configuración
+const pool = require('../database/database'); // Ajusta la ruta según tu configuración
 
 // Configura el transporte de correo
 const transporter = nodemailer.createTransport({
@@ -14,16 +14,52 @@ const transporter = nodemailer.createTransport({
 });
 
 // Ruta para recuperar la contraseña
+/**
+ * @swagger
+ * /restablecer-contrasena:
+ *   post:
+ *     tags: [Authentication]
+ *     summary: Recuperar contraseña
+ *     description: Envía un correo para recuperar la contraseña de un usuario
+ *     produces:
+ *       - application/json
+ *     parameters:
+ *       - name: emailData
+ *         description: Email del usuario
+ *         in: body
+ *         required: true
+ *         schema:
+ *           type: object
+ *           properties:
+ *             email:
+ *               type: string
+ *               example: "usuario@ejemplo.com"
+ *     responses:
+ *       200:
+ *         description: Correo de recuperación enviado
+ *         schema:
+ *           type: object
+ *           properties:
+ *             status:
+ *               type: boolean
+ *             mensaje:
+ *               type: string
+ *       400:
+ *         description: Email no registrado
+ *       500:
+ *         description: Error en el servidor
+ */
 router.post('/', (req, res) => {
     const { email } = req.body;
 
-    mysqlConnection.query('SELECT * FROM usuarios WHERE email = ?', [email], async (error, results) => {
+    const query = 'SELECT * FROM usuarios WHERE correo = $1';
+    pool.query(query, [email], async (error, results) => {
         if (error) {
             console.error('Error al verificar el correo:', error);
             return res.status(500).json({ status: false, mensaje: 'Ocurrió un error al verificar el correo.' });
         }
 
-        if (results.length === 0) {
+        if (results.rows.length === 0) {
             return res.status(400).json({ status: false, mensaje: 'El correo electrónico no está registrado.' });
         }
 

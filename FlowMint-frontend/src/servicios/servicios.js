@@ -1,6 +1,6 @@
 
 // // Agrega aquí las funciones para las operaciones CRUD adicionales, como editar, eliminar, obtener por ID, etc.
-const URL = 'http://localhost:4000'; // Ajusta la URL según tu backend
+const URL = 'http://localhost:4000/api'; // Ajusta la URL según tu backend
 
 export async function login(datos) {
   try {
@@ -16,6 +16,25 @@ export async function login(datos) {
     return data;
   } catch (error) {
     console.error('Error en login:', error);
+    throw error;
+  }
+}
+
+// Función para autenticación con Google
+export async function googleLogin(token) {
+  try {
+    const options = {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    };
+    const respuesta = await fetch(`${URL}/google-login`, options);
+    const data = await respuesta.json();
+    return data;
+  } catch (error) {
+    console.error('Error en autenticación con Google:', error);
     throw error;
   }
 }

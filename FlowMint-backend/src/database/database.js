@@ -1,23 +1,24 @@
 require('dotenv').config();
 
-const mysql = require('mysql2');
+const { Pool } = require('pg');
 
-// Configuración de la conexión a la base de datos usando variables de entorno
-const mysqlConnection = mysql.createConnection({
+// Configuración de la conexión a la base de datos PostgreSQL usando variables de entorno
+const pool = new Pool({
+  user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
+  database: process.env.DB_NAME || 'FlowMint',
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || 'peluqueria',
+  port: 5432, // Puerto por defecto de PostgreSQL
 });
 
-// Conectar a la base de datos
-mysqlConnection.connect((err) => {
+// Probar la conexión
+pool.query('SELECT NOW()', (err, res) => {
   if (err) {
-    console.error('Error al conectar a la base de datos:', err.message);
+    console.error('Error al conectar a la base de datos PostgreSQL:', err.stack);
   } else {
-    console.log('Conexión exitosa a la base de datos');
+    console.log('Conexión exitosa a la base de datos PostgreSQL:', res.rows[0]);
   }
 });
 
 // Exportar la conexión para su uso en otros módulos
-module.exports = mysqlConnection;
+module.exports = pool;
