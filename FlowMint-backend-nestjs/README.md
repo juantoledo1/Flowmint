@@ -1,98 +1,302 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# FlowMint Backend - NestJS
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend para el sistema de gestión de turnos FlowMint, desarrollado con NestJS, Prisma y PostgreSQL (Supabase).
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Características
 
-## Description
+- 🔐 Autenticación JWT
+- 👥 Gestión de usuarios y roles
+- 📅 Sistema de turnos
+- 💈 Gestión de servicios
+- 👨‍💼 Gestión de empleados
+- 📊 Gestión de clientes
+- 🗄️ Base de datos PostgreSQL con Supabase
+- 🔄 Migraciones con Prisma
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 📋 Requisitos Previos
 
-## Project setup
+- Node.js >= 18.x
+- npm o yarn
+- Supabase CLI instalado (`npm install -g supabase`)
+- PostgreSQL (via Supabase local o cloud)
+
+## 🛠️ Instalación
+
+### 1. Instalar dependencias
 
 ```bash
-$ npm install
+npm install
 ```
 
-## Compile and run the project
+### 2. Configurar variables de entorno
+
+Copia el archivo `.env.example` a `.env`:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+cp .env.example .env
 ```
 
-## Run tests
+El archivo `.env` ya está configurado para usar Supabase local. Si quieres usar Supabase Cloud, actualiza las variables:
+
+```env
+# Para Supabase Local (desarrollo)
+DATABASE_URL="postgresql://postgres:postgres@localhost:54322/postgres?schema=public"
+
+# Para Supabase Cloud (producción)
+# DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
+```
+
+### 3. Iniciar Supabase Local
+
+En el directorio raíz del proyecto (FlowMint):
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+cd ..
+supabase start
 ```
 
-## Deployment
+Esto iniciará:
+- PostgreSQL en `localhost:54322`
+- API en `localhost:54321`
+- Studio en `http://localhost:54323`
+- Inbucket (email testing) en `http://localhost:54324`
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Generar el cliente de Prisma
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run prisma:generate
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 5. Ejecutar migraciones
 
-## Resources
+```bash
+npm run prisma:migrate
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### 6. Poblar la base de datos (opcional)
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```bash
+npm run prisma:seed
+```
 
-## Support
+Esto creará:
+- **Roles**: Administrador, Usuario, Empleado
+- **Usuarios de prueba**:
+  - Admin: `admin` / `admin123`
+  - Usuario: `usuario` / `user123`
+- **Servicios**: Corte de cabello, Coloración, Arreglo de barba, Masaje capilar
+- **Empleados**: 3 empleados de ejemplo
+- **Clientes**: 3 clientes de ejemplo
+- **Turnos**: 2 turnos de ejemplo
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 🏃 Ejecutar el Servidor
 
-## Stay in touch
+### Modo desarrollo (con hot-reload)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+npm run start:dev
+```
 
-## License
+### Modo producción
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run build
+npm run start:prod
+```
+
+El servidor estará disponible en:
+- API: `http://localhost:3000/api`
+- Health check: `http://localhost:3000/api` (GET)
+
+## 📚 Endpoints Disponibles
+
+### Autenticación
+
+- `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/register` - Registrar nuevo usuario
+- `GET /api/auth/profile` - Obtener perfil (requiere autenticación)
+
+### Usuarios
+
+- `GET /api/usuarios` - Listar usuarios
+- `GET /api/usuarios/:id` - Obtener usuario por ID
+- `POST /api/usuarios` - Crear usuario
+- `PATCH /api/usuarios/:id` - Actualizar usuario
+- `DELETE /api/usuarios/:id` - Eliminar usuario
+
+### Roles
+
+- `GET /api/roles` - Listar roles
+- `GET /api/roles/:id` - Obtener rol por ID
+- `POST /api/roles` - Crear rol
+- `PATCH /api/roles/:id` - Actualizar rol
+- `DELETE /api/roles/:id` - Eliminar rol
+
+### Clientes
+
+- `GET /api/clientes` - Listar clientes
+- `GET /api/clientes/:id` - Obtener cliente por ID
+- `POST /api/clientes` - Crear cliente
+- `PATCH /api/clientes/:id` - Actualizar cliente
+- `DELETE /api/clientes/:id` - Eliminar cliente
+
+### Empleados
+
+- `GET /api/empleados` - Listar empleados
+- `GET /api/empleados/:id` - Obtener empleado por ID
+- `POST /api/empleados` - Crear empleado
+- `PATCH /api/empleados/:id` - Actualizar empleado
+- `DELETE /api/empleados/:id` - Eliminar empleado
+
+### Servicios
+
+- `GET /api/servicios` - Listar servicios
+- `GET /api/servicios/:id` - Obtener servicio por ID
+- `POST /api/servicios` - Crear servicio
+- `PATCH /api/servicios/:id` - Actualizar servicio
+- `DELETE /api/servicios/:id` - Eliminar servicio
+
+### Turnos
+
+- `GET /api/turnos` - Listar turnos
+- `GET /api/turnos/:id` - Obtener turno por ID
+- `POST /api/turnos` - Crear turno
+- `PATCH /api/turnos/:id` - Actualizar turno
+- `DELETE /api/turnos/:id` - Eliminar turno
+
+## 🗄️ Comandos de Base de Datos
+
+### Ver la base de datos en el navegador
+
+```bash
+npm run prisma:studio
+```
+
+Abre Prisma Studio en `http://localhost:5555`
+
+### Crear nueva migración
+
+```bash
+npm run prisma:migrate
+```
+
+### Resetear la base de datos
+
+```bash
+npm run prisma:migrate:reset
+```
+
+### Aplicar migraciones en producción
+
+```bash
+npm run prisma:migrate:deploy
+```
+
+## 🔄 Migración a Supabase Cloud
+
+Cuando estés listo para pasar a Supabase Cloud:
+
+1. Crea un proyecto en [app.supabase.com](https://app.supabase.com)
+
+2. Obtén tu connection string desde el dashboard de Supabase:
+   - Settings → Database → Connection string
+
+3. Actualiza el `.env`:
+
+```env
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.[YOUR-PROJECT-REF].supabase.co:5432/postgres"
+SUPABASE_URL="https://[YOUR-PROJECT-REF].supabase.co"
+SUPABASE_ANON_KEY="[YOUR-ANON-KEY]"
+SUPABASE_SERVICE_ROLE_KEY="[YOUR-SERVICE-ROLE-KEY]"
+```
+
+4. Ejecuta las migraciones:
+
+```bash
+npm run prisma:migrate:deploy
+npm run prisma:seed
+```
+
+## 🧪 Testing
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+```
+
+## 🐛 Debugging
+
+Para depurar en modo debug:
+
+```bash
+npm run start:debug
+```
+
+Luego conecta tu debugger al puerto 9229.
+
+## 📦 Build
+
+```bash
+npm run build
+```
+
+Los archivos compilados estarán en la carpeta `dist/`.
+
+## 🔧 Tecnologías
+
+- **NestJS** - Framework de Node.js
+- **Prisma** - ORM para PostgreSQL
+- **PostgreSQL** - Base de datos (via Supabase)
+- **JWT** - Autenticación
+- **Bcrypt** - Hash de contraseñas
+- **Class Validator** - Validación de DTOs
+- **Passport** - Estrategias de autenticación
+
+## 📝 Estructura del Proyecto
+
+```
+src/
+├── auth/              # Módulo de autenticación
+├── clientes/          # Módulo de clientes
+├── empleados/         # Módulo de empleados
+├── prisma/            # Servicio de Prisma
+├── roles/             # Módulo de roles
+├── servicios/         # Módulo de servicios
+├── turnos/            # Módulo de turnos
+├── usuarios/          # Módulo de usuarios
+├── app.module.ts      # Módulo raíz
+└── main.ts            # Punto de entrada
+
+prisma/
+├── schema.prisma      # Esquema de la base de datos
+└── seed.ts            # Datos iniciales
+```
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto es privado y no tiene licencia pública.
+
+## 👨‍💻 Autor
+
+FlowMint Team
+
+## 🆘 Soporte
+
+Si tienes problemas, revisa:
+- Logs del servidor
+- Logs de Supabase: `supabase status`
+- Prisma Studio para verificar datos

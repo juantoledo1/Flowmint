@@ -1,450 +1,442 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Button, Modal, Form, Alert, Table, Toast } from 'react-bootstrap';
-// import CustomNavbar from './CustomNavbar';
-import api from '../config/axios';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Table,
+  Button,
+  Modal,
+  Form,
+  Alert,
+  Badge,
+  InputGroup,
+} from "react-bootstrap";
+import { employeesAPI } from "../services/api";
+import { Briefcase, Plus, Edit, Trash2, Search, User } from "lucide-react";
 
 const Empleados = () => {
-    const [showAgregarEmpleadoModal, setShowAgregarEmpleadoModal] = useState(false);
-    const [showListarEmpleadosModal, setShowListarEmpleadosModal] = useState(false);
-    const [showConfirmarEliminarModal, setShowConfirmarEliminarModal] = useState(false);
-    const [showModificarEmpleadoModal, setShowModificarEmpleadoModal] = useState(false);
-    const [mensaje, setMensaje] = useState('');
-    const [error, setError] = useState('');
-    const [empleados, setEmpleados] = useState([]);
-    const [empleadosFiltrados, setEmpleadosFiltrados] = useState([]);
-    const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
-    const [nombre, setNombre] = useState('');
-    const [apellido, setApellido] = useState('');
-    const [correo, setCorreo] = useState('');
-    const [telefono, setTelefono] = useState('');
-    const [showToast, setShowToast] = useState(false);
-    const [toastMessage, setToastMessage] = useState('');
-    const [busqueda, setBusqueda] = useState('');
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [formData, setFormData] = useState({
+    nombre: "",
+    apellido: "",
+    puesto: "",
+  });
 
+  useEffect(() => {
+    loadEmployees();
+  }, []);
 
-    useEffect(() => {
-        listarEmpleados();
-    }, []);
+  const loadEmployees = async () => {
+    try {
+      setLoading(true);
+      const data = await employeesAPI.getAll();
+      setEmployees(data);
+      setError("");
+    } catch (err) {
+      setError("Failed to load employees. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    useEffect(() => {
-        if (busqueda.trim() === '') {
-            setEmpleadosFiltrados(empleados);
-        } else {
-            const filtrados = empleados.filter(empleado =>
-                empleado.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-                empleado.apellido.toLowerCase().includes(busqueda.toLowerCase())
-            );
-            setEmpleadosFiltrados(filtrados);
-        }
-    }, [busqueda, empleados]);
+  const handleShowModal = (employee = null) => {
+    if (employee) {
+      setEditingEmployee(employee);
+      setFormData({
+        nombre: employee.nombre,
+        apellido: employee.apellido,
+        puesto: employee.puesto || "",
+      });
+    } else {
+      setEditingEmployee(null);
+      setFormData({
+        nombre: "",
+        apellido: "",
+        puesto: "",
+      });
+    }
+    setShowModal(true);
+  };
 
-    const handleAgregarEmpleadoModal = () => setShowAgregarEmpleadoModal(true);
-    const handleCloseAgregarEmpleadoModal = () => setShowAgregarEmpleadoModal(false);
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditingEmployee(null);
+    setFormData({
+      nombre: "",
+      apellido: "",
+      puesto: "",
+    });
+  };
 
-    const handleListarEmpleadosModal = () => setShowListarEmpleadosModal(true);
-    const handleCloseListarEmpleadosModal = () => setShowListarEmpleadosModal(false);
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-    const handleConfirmarEliminarModal = (empleado) => {
-        setEmpleadoSeleccionado(empleado);
-        setShowConfirmarEliminarModal(true);
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    const handleCloseConfirmarEliminarModal = () => {
-        setEmpleadoSeleccionado(null);
-        setShowConfirmarEliminarModal(false);
-    };
+    try {
+      if (editingEmployee) {
+        await employeesAPI.update(editingEmployee.empleado_id, formData);
+        setSuccess("Employee updated successfully!");
+      } else {
+        await employeesAPI.create(formData);
+        setSuccess("Employee created successfully!");
+      }
+      handleCloseModal();
+      loadEmployees();
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+          "Failed to save employee. Please try again.",
+      );
+    }
+  };
 
-    const handleModificarEmpleadoModal = (empleado) => {
-        setEmpleadoSeleccionado(empleado);
-        setNombre(empleado.nombre);
-        setApellido(empleado.apellido);
-        setCorreo(empleado.correo);
-        setTelefono(empleado.telefono);
-        setShowModificarEmpleadoModal(true);
-    };
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this employee?")) {
+      try {
+        await employeesAPI.delete(id);
+        setSuccess("Employee deleted successfully!");
+        loadEmployees();
+        setTimeout(() => setSuccess(""), 3000);
+      } catch (err) {
+        setError("Failed to delete employee. Please try again.");
+      }
+    }
+  };
 
-    const handleCloseModificarEmpleadoModal = () => {
-        setEmpleadoSeleccionado(null);
-        setNombre('');
-        setApellido('');
-        setCorreo('');
-        setTelefono('');
-        setShowModificarEmpleadoModal(false);
-    };
+  const filteredEmployees = employees.filter(
+    (employee) =>
+      employee.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.apellido.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (employee.puesto &&
+        employee.puesto.toLowerCase().includes(searchTerm.toLowerCase())),
+  );
 
-    const handleAgregarEmpleado = async () => {
-        try {
-            const response = await api.post('/crear_empleado', {
-                nombre,
-                apellido,
-                correo,
-                telefono
-            });
-            console.log(response.data);
-            setNombre('');
-            setApellido('');
-            setCorreo('');
-            setTelefono('');
-            handleCloseAgregarEmpleadoModal();
-            setToastMessage('El empleado se creó correctamente');
-            setShowToast(true);
-            listarEmpleados();
-        } catch (error) {
-            console.error('Error al agregar empleado:', error);
-            setError('Error al agregar empleado');
-            setMensaje('');
-        }
-    };
-
-    const listarEmpleados = async () => {
-        try {
-            const response = await api.get('/listar_empleados');
-            setEmpleados(response.data);
-            setEmpleadosFiltrados(response.data);
-        } catch (error) {
-            console.error('Error al obtener la lista de empleados:', error);
-        }
-    };
-
-    const handleEliminarEmpleado = async () => {
-        try {
-            const id_empleado = empleadoSeleccionado.id_empleado;
-            const response = await api.delete(`/eliminar_empleado/${id_empleado}`);
-            console.log(response.data);
-            setToastMessage('El empleado se eliminó correctamente');
-            setShowToast(true);
-            handleCloseConfirmarEliminarModal();
-            listarEmpleados();
-        } catch (error) {
-            console.error('Error al eliminar empleado:', error);
-            setError('Error al eliminar empleado');
-            setMensaje('');
-        }
-    };
-
-    const handleModificarEmpleado = async () => {
-        try {
-            const response = await api.put(`/actualizar_empleado/${empleadoSeleccionado.id_empleado}`, {
-                nombre,
-                apellido,
-                correo,
-                telefono
-            });
-            console.log(response.data);
-            setToastMessage('El empleado se modificó correctamente');
-            setShowToast(true);
-            handleCloseModificarEmpleadoModal();
-            listarEmpleados();
-        } catch (error) {
-            console.error('Error al modificar empleado:', error);
-            setError('Error al modificar empleado');
-            setMensaje('');
-        }
-    };
-
-    useEffect(() => {
-        let timer;
-        if (showToast) {
-            timer = setTimeout(() => {
-                setShowToast(false);
-                setToastMessage('');
-            }, 5000); // 5000 milisegundos = 5 segundos
-        }
-        return () => clearTimeout(timer);
-    }, [showToast]);
-
-    return (
-        <>
-            {/* <CustomNavbar /> */}
-            <div className="bg-dark text-light vh-100 d-flex align-items-center justify-content-center">
-                <div>
-                    <h2 className='text-center'>Empleados</h2>
-                    <div className="d-grid gap-2 mb-3">
-                        <Button variant="success" size="lg" onClick={handleAgregarEmpleadoModal}>Agregar Empleado</Button>
-                        <Button variant="info" size="lg" onClick={handleListarEmpleadosModal}>Listar Empleados</Button>
-                    </div>
-                </div>
+  return (
+    <Container fluid>
+      {/* Header */}
+      <Row className="mb-4">
+        <Col>
+          <div className="d-flex align-items-center gap-3 mb-3">
+            <Briefcase size={36} style={{ color: "var(--neon-purple)" }} />
+            <div>
+              <h2 style={{ color: "var(--neon-purple)", marginBottom: "0" }}>
+                EMPLOYEES
+              </h2>
+              <small style={{ color: "var(--text-muted)" }}>
+                Manage your team members
+              </small>
             </div>
+          </div>
+        </Col>
+      </Row>
 
-            {/* Modales */}
-            <ModalAgregarEmpleado
-                show={showAgregarEmpleadoModal}
-                handleClose={handleCloseAgregarEmpleadoModal}
-                handleAgregarEmpleado={handleAgregarEmpleado}
-                nombre={nombre}
-                setNombre={setNombre}
-                apellido={apellido}
-                setApellido={setApellido}
-                correo={correo}
-                setCorreo={setCorreo}
-                telefono={telefono}
-                setTelefono={setTelefono}
-                error={error}
-            />
-            <ModalListarEmpleados
-                show={showListarEmpleadosModal}
-                handleClose={handleCloseListarEmpleadosModal}
-                empleados={empleadosFiltrados}
-                busqueda={busqueda}
-                setBusqueda={setBusqueda}
-                handleConfirmarEliminarModal={handleConfirmarEliminarModal}
-                handleModificarEmpleadoModal={handleModificarEmpleadoModal}
-            />
-            <ModalConfirmarEliminarEmpleado
-                show={showConfirmarEliminarModal}
-                handleClose={handleCloseConfirmarEliminarModal}
-                empleadoSeleccionado={empleadoSeleccionado}
-                handleEliminarEmpleado={handleEliminarEmpleado}
-            />
-            <ModalModificarEmpleado
-                show={showModificarEmpleadoModal}
-                handleClose={handleCloseModificarEmpleadoModal}
-                handleModificarEmpleado={handleModificarEmpleado}
-                nombre={nombre}
-                setNombre={setNombre}
-                apellido={apellido}
-                setApellido={setApellido}
-                correo={correo}
-                setCorreo={setCorreo}
-                telefono={telefono}
-                setTelefono={setTelefono}
-                error={error}
-            />
-            
-            {/* Toast para mensajes */}
-            <Toast
-                show={showToast}
-                onClose={() => setShowToast(false)}
-                className="position-fixed top-0 start-50 translate-middle-x bg-black text-light"
-                style={{ zIndex: 9999 }}
-                delay={5000} // Duración del toast en milisegundos
-                autohide
+      {/* Alerts */}
+      {error && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => setError("")}
+          className="alert-error"
+        >
+          {error}
+        </Alert>
+      )}
+      {success && (
+        <Alert
+          variant="success"
+          dismissible
+          onClose={() => setSuccess("")}
+          className="alert-success"
+        >
+          {success}
+        </Alert>
+      )}
+
+      {/* Actions Bar */}
+      <Row className="mb-4">
+        <Col md={8}>
+          <InputGroup>
+            <InputGroup.Text
+              style={{
+                background: "var(--bg-card)",
+                borderColor: "var(--border-color)",
+                color: "var(--neon-cyan)",
+              }}
             >
-                <Toast.Header closeButton={false}>
-                    <strong className="me-auto">Mensaje</strong>
-                </Toast.Header>
-                <Toast.Body>{toastMessage}</Toast.Body>
-            </Toast>
+              <Search size={20} />
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search employees by name or position..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                background: "var(--bg-card)",
+                borderColor: "var(--border-color)",
+                color: "var(--text-primary)",
+              }}
+            />
+          </InputGroup>
+        </Col>
+        <Col md={4} className="text-end">
+          <Button
+            variant="success"
+            onClick={() => handleShowModal()}
+            className="btn-success"
+            style={{ textTransform: "uppercase", fontWeight: "bold" }}
+          >
+            <Plus size={20} className="me-2" />
+            Add Employee
+          </Button>
+        </Col>
+      </Row>
 
-            {/* Mensajes de Alerta */}
-            {mensaje && <Alert variant="success" onClose={() => setMensaje('')} dismissible>{mensaje}</Alert>}
-            {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
-        </>
-    );
+      {/* Employees Table */}
+      <Row>
+        <Col>
+          <div className="card">
+            {loading ? (
+              <div className="text-center p-5">
+                <div className="spinner mx-auto mb-3"></div>
+                <p style={{ color: "var(--text-muted)" }}>
+                  Loading employees...
+                </p>
+              </div>
+            ) : filteredEmployees.length === 0 ? (
+              <div className="text-center p-5">
+                <Briefcase
+                  size={64}
+                  style={{ color: "var(--text-muted)", opacity: 0.3 }}
+                  className="mb-3"
+                />
+                <h4 style={{ color: "var(--text-muted)" }}>
+                  No employees found
+                </h4>
+                <p style={{ color: "var(--text-muted)" }}>
+                  {searchTerm
+                    ? "Try adjusting your search"
+                    : "Start by adding your first employee"}
+                </p>
+                {!searchTerm && (
+                  <Button
+                    variant="primary"
+                    onClick={() => handleShowModal()}
+                    className="mt-3"
+                  >
+                    <Plus size={20} className="me-2" />
+                    Add First Employee
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <Table
+                responsive
+                hover
+                style={{ marginBottom: 0 }}
+                className="table-dark"
+              >
+                <thead>
+                  <tr>
+                    <th style={{ color: "var(--neon-cyan)" }}>ID</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>NAME</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>POSITION</th>
+                    <th
+                      style={{ color: "var(--neon-cyan)" }}
+                      className="text-center"
+                    >
+                      ACTIONS
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredEmployees.map((employee) => (
+                    <tr key={employee.empleado_id}>
+                      <td>
+                        <Badge bg="secondary" className="badge-primary">
+                          #{employee.empleado_id}
+                        </Badge>
+                      </td>
+                      <td>
+                        <div className="d-flex align-items-center gap-2">
+                          <div
+                            className="d-flex align-items-center justify-content-center rounded-circle"
+                            style={{
+                              width: "36px",
+                              height: "36px",
+                              background:
+                                "linear-gradient(135deg, var(--neon-purple), var(--neon-pink))",
+                              border: "2px solid var(--neon-purple)",
+                              flexShrink: 0,
+                            }}
+                          >
+                            <User size={18} />
+                          </div>
+                          <strong style={{ color: "var(--text-primary)" }}>
+                            {employee.nombre} {employee.apellido}
+                          </strong>
+                        </div>
+                      </td>
+                      <td>
+                        {employee.puesto ? (
+                          <Badge
+                            bg="info"
+                            style={{
+                              background: "rgba(139, 92, 246, 0.2)",
+                              border: "1px solid var(--neon-purple)",
+                              color: "var(--neon-purple)",
+                              padding: "0.5rem 1rem",
+                              fontSize: "0.85rem",
+                            }}
+                          >
+                            {employee.puesto}
+                          </Badge>
+                        ) : (
+                          <small style={{ color: "var(--text-muted)" }}>
+                            No position assigned
+                          </small>
+                        )}
+                      </td>
+                      <td className="text-center">
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          onClick={() => handleShowModal(employee)}
+                          className="me-2"
+                          style={{
+                            borderColor: "var(--neon-yellow)",
+                            color: "var(--neon-yellow)",
+                          }}
+                        >
+                          <Edit size={16} />
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() => handleDelete(employee.empleado_id)}
+                          style={{
+                            borderColor: "var(--neon-pink)",
+                            color: "var(--neon-pink)",
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="mt-3 text-center">
+            <small style={{ color: "var(--text-muted)" }}>
+              Showing {filteredEmployees.length} of {employees.length} employees
+            </small>
+          </div>
+        </Col>
+      </Row>
+
+      {/* Add/Edit Modal */}
+      <Modal
+        show={showModal}
+        onHide={handleCloseModal}
+        centered
+        contentClassName="modal-content"
+      >
+        <Modal.Header
+          closeButton
+          style={{
+            background: "var(--bg-card)",
+            borderBottom: "2px solid var(--border-color)",
+          }}
+        >
+          <Modal.Title style={{ color: "var(--neon-purple)" }}>
+            {editingEmployee ? "EDIT EMPLOYEE" : "NEW EMPLOYEE"}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ background: "var(--bg-card)" }}>
+          <Form onSubmit={handleSubmit}>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>First Name *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter first name"
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>Last Name *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="apellido"
+                    value={formData.apellido}
+                    onChange={handleChange}
+                    required
+                    placeholder="Enter last name"
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+
+            <Form.Group className="mb-4">
+              <Form.Label>
+                <Briefcase size={16} className="me-2" />
+                Position / Role
+              </Form.Label>
+              <Form.Control
+                type="text"
+                name="puesto"
+                value={formData.puesto}
+                onChange={handleChange}
+                placeholder="e.g. Senior Stylist, Barber, Colorist..."
+              />
+              <Form.Text style={{ color: "var(--text-muted)" }}>
+                Optional: Specify the employee's role or position
+              </Form.Text>
+            </Form.Group>
+
+            <div className="d-flex gap-2 justify-content-end">
+              <Button
+                variant="secondary"
+                onClick={handleCloseModal}
+                style={{
+                  borderColor: "var(--text-muted)",
+                  color: "var(--text-muted)",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="success" className="btn-success">
+                {editingEmployee ? "Update Employee" : "Create Employee"}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
+    </Container>
+  );
 };
 
 export default Empleados;
-
-// Componente ModalAgregarEmpleado para agregar un nuevo empleado
-const ModalAgregarEmpleado = ({
-    show,
-    handleClose,
-    handleAgregarEmpleado,
-    nombre,
-    setNombre,
-    apellido,
-    setApellido,
-    correo,
-    setCorreo,
-    telefono,
-    setTelefono,
-    error
-}) => {
-    return (
-        <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Agregar Empleado</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group className="mb-3" controlId="formNombre">
-                        <Form.Label>Nombre</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el nombre"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formApellido">
-                        <Form.Label>Apellido</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el apellido"
-                            value={apellido}
-                            onChange={(e) => setApellido(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formCorreo">
-                        <Form.Label>Correo</Form.Label>
-                        <Form.Control
-                            type="email"
-                            placeholder="Ingrese el correo"
-                            value={correo}
-                            onChange={(e) => setCorreo(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formTelefono">
-                        <Form.Label>Teléfono</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el teléfono"
-                            value={telefono}
-                            onChange={(e) => setTelefono(e.target.value)}
-                        />
-                    </Form.Group>
-                </Form>
-                {error && <p className="text-danger">{error}</p>}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
-                <Button variant="primary" onClick={handleAgregarEmpleado}>Guardar</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
-
-// Componente ModalListarEmpleados para mostrar todos los empleados
-const ModalListarEmpleados = ({ show, handleClose, empleados, busqueda, setBusqueda, handleConfirmarEliminarModal, handleModificarEmpleadoModal }) => {
-    return (
-        <Modal show={show} onHide={handleClose} size="lg">
-            <Modal.Header closeButton>
-                <Modal.Title>Listado de Empleados</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            <Form.Group controlId="busqueda">
-                    <Form.Label>Buscar Empleado</Form.Label>
-                    <Form.Control
-                        type="text"
-                        placeholder="Buscar por nombre o apellido"
-                        value={busqueda}
-                        onChange={(e) => setBusqueda(e.target.value)}
-                    />
-                </Form.Group>
-                <Table striped bordered hover responsive className="table-responsive">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Nombre</th>
-                            <th>Apellido</th>
-                            <th>Correo</th>
-                            <th>Teléfono</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {empleados.map((empleado) => (
-                            <tr key={empleado.id_empleado}>
-                                <td>{empleado.id_empleado}</td>
-                                <td>{empleado.nombre}</td>
-                                <td>{empleado.apellido}</td>
-                                <td>{empleado.correo}</td>
-                                <td>{empleado.telefono}</td>
-                                <td className="d-flex justify-content-between align-items-center">
-                                    <Button variant="warning" onClick={() => handleModificarEmpleadoModal(empleado)}>Modificar</Button>{' '}
-                                    <Button variant="danger" onClick={() => handleConfirmarEliminarModal(empleado)}>Eliminar</Button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </Table>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Cerrar</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
-
-// Componente ModalConfirmarEliminarEmpleado para confirmar la eliminación de un empleado
-const ModalConfirmarEliminarEmpleado = ({ show, handleClose, empleadoSeleccionado, handleEliminarEmpleado }) => {
-    return (
-        <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Confirmar Eliminación</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <p>¿Estás seguro de eliminar al empleado {empleadoSeleccionado?.nombre} {empleadoSeleccionado?.apellido}?</p>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
-                <Button variant="danger" onClick={handleEliminarEmpleado}>Eliminar</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
-
-// Componente ModalModificarEmpleado para modificar un empleado existente
-const ModalModificarEmpleado = ({
-    show,
-    handleClose,
-    handleModificarEmpleado,
-    nombre,
-    setNombre,
-    apellido,
-    setApellido,
-    correo,
-    setCorreo,
-    telefono,
-    setTelefono,
-    error
-}) => {
-    return (
-        <Modal show={show} onHide={handleClose}>
-            <Modal.Header closeButton>
-                <Modal.Title>Modificar Empleado</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <Form>
-                    <Form.Group className="mb-3" controlId="formNombre">
-                        <Form.Label>Nombre</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el nombre"
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formApellido">
-                        <Form.Label>Apellido</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el apellido"
-                            value={apellido}
-                            onChange={(e) => setApellido(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formCorreo">
-                        <Form.Label>Correo</Form.Label>
-                        <Form.Control
-                            type="email"
-                            placeholder="Ingrese el correo"
-                            value={correo}
-                            onChange={(e) => setCorreo(e.target.value)}
-                        />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3" controlId="formTelefono">
-                        <Form.Label>Teléfono</Form.Label>
-                        <Form.Control
-                            type="text"
-                            placeholder="Ingrese el teléfono"
-                            value={telefono}
-                            onChange={(e) => setTelefono(e.target.value)}
-                        />
-                    </Form.Group>
-                </Form>
-                {error && <p className="text-danger">{error}</p>}
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
-                <Button variant="primary" onClick={handleModificarEmpleado}>Guardar Cambios</Button>
-            </Modal.Footer>
-        </Modal>
-    );
-};
