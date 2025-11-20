@@ -5,7 +5,6 @@ import {
   Request,
   Get,
   Body,
-  Query,
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -66,17 +65,6 @@ export class AuthController {
     return this.authService.login(user);
   }
 
-  @Post('debug-login')
-  async debugLogin(@Query('username') username: string, @Query('password') password: string) {
-    console.log('Debug login endpoint called with:', { username, password });
-    const user = await this.authService.validateUser(username, password);
-    return {
-      userFound: !!user,
-      userId: user?.usuario_id,
-      userName: user?.user,
-      message: user ? 'User validated successfully' : 'User validation failed'
-    };
-  }
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
