@@ -5,6 +5,8 @@ import {
   Request,
   Get,
   Body,
+  Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
@@ -24,7 +26,6 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  @UseGuards(LocalAuthGuard)
   @ApiOperation({
     summary: 'User login',
     description: 'Authenticate user and return JWT token',
@@ -54,8 +55,27 @@ export class AuthController {
     },
   })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Request() req, @Body() loginDto: LoginDto) {
-    return this.authService.login(req.user);
+  async login(@Body() loginDto: LoginDto) {
+    console.log('Direct login endpoint called with:', loginDto);
+    const user = await this.authService.validateUser(loginDto.user, loginDto.pass);
+    if (!user) {
+      console.log('Direct login - user validation failed');
+      throw new UnauthorizedException('Invalid credentials');
+    }
+    console.log('Direct login - user validated successfully, generating token');
+    return this.authService.login(user);
+  }
+
+  @Post('debug-login')
+  async debugLogin(@Query('username') username: string, @Query('password') password: string) {
+    console.log('Debug login endpoint called with:', { username, password });
+    const user = await this.authService.validateUser(username, password);
+    return {
+      userFound: !!user,
+      userId: user?.usuario_id,
+      userName: user?.user,
+      message: user ? 'User validated successfully' : 'User validation failed'
+    };
   }
 
   @Get('profile')

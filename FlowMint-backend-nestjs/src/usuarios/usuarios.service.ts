@@ -49,6 +49,9 @@ export class UsuariosService {
   }
 
   async findByUsername(username: string) {
-    return this.prisma.usuario.findUnique({ where: { user: username } });
+    console.log('Buscando usuario con username:', username);
+    const user = await this.prisma.usuario.findUnique({ where: { user: username } });
+    console.log('Usuario encontrado:', user ? { usuario_id: user.usuario_id, user: user.user, hasPass: !!user.pass } : 'No encontrado');
+    return user;
   }
 }
