@@ -175,7 +175,29 @@ git clone <repository-url>
 cd FlowMint
 ```
 
-#### 2. Backend Setup
+#### 2. Quick Start with Docker (Recommended)
+
+The easiest way to run the application is using Docker Compose:
+
+```bash
+# Start all services (backend, frontend, postgres, adminer)
+docker-compose up -d
+
+# Seed the database after services are running
+docker-compose exec backend sh -c "cd /usr/src/app && npx tsx prisma/seed.ts"
+
+# The application will be available at:
+# - Frontend: http://localhost:5173
+# - Backend API: http://localhost:3000/api
+# - Swagger Docs: http://localhost:3000/api/docs
+# - Adminer (DB admin): http://localhost:8080
+```
+
+#### 3. Alternative: Manual Setup
+
+If you prefer to run services manually:
+
+**Backend Setup:**
 
 ```bash
 # Navigate to backend
@@ -204,7 +226,7 @@ The backend will be available at:
 - 🚀 API: http://localhost:3000/api
 - 📖 Swagger Docs: http://localhost:3000/api/docs
 
-#### 3. Frontend Setup
+**Frontend Setup**
 
 Open a new terminal:
 
@@ -233,6 +255,18 @@ Use the default credentials:
 **Regular User:**
 - Username: `usuario`
 - Password: `user123`
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**Login not working after fresh installation:**
+- Make sure the database is properly seeded with user data
+- If login fails with credentials that should work, ensure the seed command has been run successfully
+
+**Docker-related issues:**
+- Make sure Docker has enough allocated resources (memory, disk space)
+- If services fail to start, try `docker-compose down` followed by `docker-compose up --force-recreate`
 
 ---
 
