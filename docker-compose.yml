@@ -6,8 +6,13 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - postgres
-    command: sh -c "npx prisma migrate deploy && node dist/main"
+      postgres:
+        condition: service_healthy
+    command: sh -c "npx prisma migrate deploy && node dist/src/main"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/flowmint?schema=public
+      - JWT_SECRET=super-secret-key-that-should-be-in-a-vault-change-in-production
+      - PORT=3000
     networks:
       - app-network
 
@@ -37,6 +42,11 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d flowmint"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     networks:
       - app-network
 

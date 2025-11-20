@@ -11,6 +11,7 @@ import Usuarios from './component/Usuarios';
 import Ganancias from './component/Ganancias';
 import Dashboard from './component/Dashboard';
 import ProtectedRoute from './component/ProtectedRoute';
+import DashboardHome from './component/DashboardHome'; // Import the new component
 
 function App() {
     return (
@@ -19,11 +20,17 @@ function App() {
                 <Route path='/' element={<Home />} />
                 <Route path='/login' element={<Login />} />
                 <Route path='/registros' element={<Registros />} />
-                <Route path='/dashboard' element={
-                    <ProtectedRoute>
-                        <Dashboard />
-                    </ProtectedRoute>
-                }>
+
+                {/* Protected Routes using Dashboard as Layout */}
+                <Route 
+                    path='/dashboard' 
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                >
+                    <Route index element={<DashboardHome />} />
                     <Route path='clientes' element={<Clientes />} />
                     <Route path='empleados' element={<Empleados />} />
                     <Route path='servicios' element={<Servicios />} />

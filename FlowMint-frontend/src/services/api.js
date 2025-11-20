@@ -33,6 +33,7 @@ api.interceptors.response.use(
             // Token expired or invalid
             localStorage.removeItem('token');
             localStorage.removeItem('user');
+            localStorage.removeItem('isLoggedIn');
             window.location.href = '/login';
         }
         return Promise.reject(error);
@@ -43,9 +44,12 @@ api.interceptors.response.use(
 export const authAPI = {
     login: async (credentials) => {
         const response = await api.post('/auth/login', credentials);
-        if (response.data.access_token) {
+        // Ensure both token and user object exist
+        if (response.data.access_token && response.data.user) {
             localStorage.setItem('token', response.data.access_token);
+            // Safely stringify user object
             localStorage.setItem('user', JSON.stringify(response.data.user));
+            localStorage.setItem('isLoggedIn', 'true');
         }
         return response.data;
     },
@@ -53,6 +57,7 @@ export const authAPI = {
     logout: () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        localStorage.removeItem('isLoggedIn');
         window.location.href = '/login';
     },
 
@@ -63,7 +68,13 @@ export const authAPI = {
 
     getCurrentUser: () => {
         const userStr = localStorage.getItem('user');
-        return userStr ? JSON.parse(userStr) : null;
+        if (!userStr) return null;
+        try {
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Failed to parse user data from localStorage", error);
+            return null;
+        }
     },
 
     isAuthenticated: () => {

@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { authAPI } from "../services/api";
 import { motion } from "framer-motion";
-import { Zap, Lock, User, AlertCircle } from "lucide-react";
+import { Zap, Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react";
 import "../index.css";
 
 const Login = () => {
   const [credentials, setCredentials] = useState({ user: "", pass: "" });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -33,10 +34,8 @@ const Login = () => {
       const response = await authAPI.login(credentials);
 
       if (response.access_token) {
-        // Success animation
-        setTimeout(() => {
-          navigate("/dashboard");
-        }, 500);
+        // Success - redirect to dashboard
+        window.location.href = "/dashboard";
       }
     } catch (err) {
       setError(
@@ -122,17 +121,37 @@ const Login = () => {
               />
               Password
             </label>
-            <input
-              type="password"
-              id="pass"
-              name="pass"
-              value={credentials.pass}
-              onChange={handleChange}
-              placeholder="Enter your password"
-              required
-              autoComplete="current-password"
-              disabled={loading}
-            />
+            <div style={{ position: "relative" }}>
+              <input
+                type={showPassword ? "text" : "password"}
+                id="pass"
+                name="pass"
+                value={credentials.pass}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                required
+                autoComplete="current-password"
+                disabled={loading}
+                style={{ paddingRight: "3rem" }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                style={{
+                  position: "absolute",
+                  right: "0.75rem",
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  background: "none",
+                  border: "none",
+                  color: "var(--neon-cyan)",
+                  cursor: "pointer",
+                  padding: "0.5rem",
+                }}
+              >
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </button>
+            </div>
           </div>
 
           <button
