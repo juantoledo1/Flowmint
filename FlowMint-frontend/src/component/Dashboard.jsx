@@ -47,6 +47,12 @@ const Dashboard = () => {
 
   const menuItems = [
     {
+      path: "/dashboard",
+      icon: Zap,
+      label: "Dashboard",
+      color: "var(--neon-cyan)",
+    },
+    {
       path: "/dashboard/turnos",
       icon: Calendar,
       label: "Appointments",
@@ -99,7 +105,8 @@ const Dashboard = () => {
         <Zap
           size={48}
           className="neon-pulse mb-2"
-          style={{ color: "var(--neon-cyan)" }}
+          style={{ color: "var(--neon-cyan)", cursor: "pointer" }}
+          onClick={() => navigate('/dashboard')}
         />
         <h2
           className="mb-0"
@@ -109,7 +116,9 @@ const Dashboard = () => {
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             fontSize: "1.5rem",
+            cursor: "pointer"
           }}
+          onClick={() => navigate('/dashboard')}
         >
           FlowMint
         </h2>

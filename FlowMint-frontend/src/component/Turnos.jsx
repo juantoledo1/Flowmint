@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Button, Modal, Table, Alert, Toast, ToastContainer } from 'react-bootstrap';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import api from '../config/axios';
+import momentTimezone from 'moment-timezone';
+import api from '../services/api';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 const localizer = momentLocalizer(moment);
@@ -22,7 +23,7 @@ const Turnos = () => {
 
   const listarTurnos = async () => {
     try {
-      const response = await api.get('/listar_turnos');
+      const response = await api.get('/turnos');
       setTurnos(response.data);
     } catch (error) {
       console.error('Error al obtener la lista de turnos:', error);
@@ -49,8 +50,8 @@ const Turnos = () => {
 
   const handleEliminarTurno = async () => {
     try {
-      const id_turno = selectedTurno.id;
-      const response = await api.delete(`/eliminar_turno/${id_turno}`);
+      const id_turno = selectedTurno.id || selectedTurno.turno_id;
+      const response = await api.delete(`/turnos/${id_turno}`);
       console.log(response.data);
       setMensaje('El turno se eliminó correctamente');
       setShowToast(true);
@@ -64,27 +65,27 @@ const Turnos = () => {
   };
 
   const events = turnos.map((turno) => {
-    const [hour, minute] = turno.hora.split(':');
-    const start = new Date(turno.fecha);
-    start.setHours(hour);
-    start.setMinutes(minute);
+    // En el nuevo sistema, los turnos tienen fecha_hora como campo único de tipo DateTime
+    const startDate = new Date(turno.fecha_hora);
 
-    const end = new Date(start);
-    end.setHours(start.getHours() + 1);
+    // Calcular la duración del servicio en minutos para establecer la hora de finalización
+    const duracion = turno.servicio.duracion || 60; // Si no hay duración, usar 60 minutos por defecto
+    const endDate = new Date(startDate.getTime() + duracion * 60 * 1000); // Sumar duración en minutos
 
+    // Necesitamos cargar los datos relacionados de cliente, empleado y servicio
     return {
-      id: turno.id_turno,
-      title: `${turno.nombre_servicio} con ${turno.nombre_empleado} ${turno.apellido_empleado}`,
-      start,
-      end,
+      id: turno.turno_id,
+      title: `${turno.servicio.nombre || 'Servicio'} con ${turno.empleado.nombre || 'Empleado'} ${turno.empleado.apellido || ''}`,
+      start: startDate,
+      end: endDate,
       details: {
-        id: turno.id_turno,
-        cliente: `${turno.nombre_cliente} ${turno.apellido_cliente}`,
-        empleado: `${turno.nombre_empleado} ${turno.apellido_empleado}`,
-        servicio: turno.nombre_servicio,
-        fecha: moment(turno.fecha).format('YYYY-MM-DD'),
-        hora: turno.hora,
-        precio: turno.precio,
+        id: turno.turno_id,
+        cliente: `${turno.cliente.nombre || 'Cliente'} ${turno.cliente.apellido || ''}`,
+        empleado: `${turno.empleado.nombre || 'Empleado'} ${turno.empleado.apellido || ''}`,
+        servicio: turno.servicio.nombre || 'Servicio',
+        fecha: moment(startDate).format('YYYY-MM-DD'),
+        hora: moment(startDate).format('HH:mm'),
+        estado: turno.estado,
       },
     };
   });
@@ -101,6 +102,7 @@ const Turnos = () => {
             <th>Fecha</th>
             <th>Hora</th>
             <th>Precio</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -112,7 +114,8 @@ const Turnos = () => {
             <td>{turno.details.servicio}</td>
             <td>{turno.details.fecha}</td>
             <td>{turno.details.hora}</td>
-            <td>{turno.details.precio}</td>
+            <td>${turno.details.precio || turno.details.servicio?.precio || 'N/A'}</td>
+            <td>{turno.details.estado || 'N/A'}</td>
             <td>
               <Button variant="danger" onClick={() => onEliminar(turno)}>Eliminar</Button>
             </td>
