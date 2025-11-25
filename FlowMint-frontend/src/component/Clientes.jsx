@@ -40,7 +40,7 @@ const Clientes = () => {
       setClients(data);
       setError("");
     } catch (err) {
-      setError("Failed to load clients. Please try again.");
+      setError("Error al cargar clientes. Por favor, inténtalo de nuevo.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -92,10 +92,10 @@ const Clientes = () => {
     try {
       if (editingClient) {
         await clientsAPI.update(editingClient.cliente_id, formData);
-        setSuccess("Client updated successfully!");
+        setSuccess("¡Cliente actualizado exitosamente!");
       } else {
         await clientsAPI.create(formData);
-        setSuccess("Client created successfully!");
+        setSuccess("¡Cliente creado exitosamente!");
       }
       handleCloseModal();
       loadClients();
@@ -103,20 +103,20 @@ const Clientes = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to save client. Please try again.",
+          "Error al guardar cliente. Por favor, inténtalo de nuevo.",
       );
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this client?")) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este cliente?")) {
       try {
         await clientsAPI.delete(id);
-        setSuccess("Client deleted successfully!");
+        setSuccess("¡Cliente eliminado exitosamente!");
         loadClients();
         setTimeout(() => setSuccess(""), 3000);
       } catch (err) {
-        setError("Failed to delete client. Please try again.");
+        setError("Error al eliminar cliente. Por favor, inténtalo de nuevo.");
       }
     }
   };
@@ -139,10 +139,10 @@ const Clientes = () => {
             <Users size={36} style={{ color: "var(--neon-green)" }} />
             <div>
               <h2 style={{ color: "var(--neon-green)", marginBottom: "0" }}>
-                CLIENTS
+                CLIENTES
               </h2>
               <small style={{ color: "var(--text-muted)" }}>
-                Manage your client database
+                Gestiona tu base de datos de clientes
               </small>
             </div>
           </div>
@@ -186,7 +186,7 @@ const Clientes = () => {
             </InputGroup.Text>
             <Form.Control
               type="text"
-              placeholder="Search clients by name, email or phone..."
+              placeholder="Buscar clientes por nombre, email o teléfono..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -205,7 +205,7 @@ const Clientes = () => {
             style={{ textTransform: "uppercase", fontWeight: "bold" }}
           >
             <Plus size={20} className="me-2" />
-            Add Client
+            Agregar Cliente
           </Button>
         </Col>
       </Row>
@@ -217,7 +217,7 @@ const Clientes = () => {
             {loading ? (
               <div className="text-center p-5">
                 <div className="spinner mx-auto mb-3"></div>
-                <p style={{ color: "var(--text-muted)" }}>Loading clients...</p>
+                <p style={{ color: "var(--text-muted)" }}>Cargando clientes...</p>
               </div>
             ) : filteredClients.length === 0 ? (
               <div className="text-center p-5">
@@ -226,11 +226,11 @@ const Clientes = () => {
                   style={{ color: "var(--text-muted)", opacity: 0.3 }}
                   className="mb-3"
                 />
-                <h4 style={{ color: "var(--text-muted)" }}>No clients found</h4>
+                <h4 style={{ color: "var(--text-muted)" }}>No se encontraron clientes</h4>
                 <p style={{ color: "var(--text-muted)" }}>
                   {searchTerm
-                    ? "Try adjusting your search"
-                    : "Start by adding your first client"}
+                    ? "Intenta ajustar tu búsqueda"
+                    : "Comienza agregando tu primer cliente"}
                 </p>
                 {!searchTerm && (
                   <Button
@@ -239,7 +239,7 @@ const Clientes = () => {
                     className="mt-3"
                   >
                     <Plus size={20} className="me-2" />
-                    Add First Client
+                    Agregar Primer Cliente
                   </Button>
                 )}
               </div>
@@ -253,13 +253,13 @@ const Clientes = () => {
                 <thead>
                   <tr>
                     <th style={{ color: "var(--neon-cyan)" }}>ID</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>NAME</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>CONTACT</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>NOMBRE</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>CONTACTO</th>
                     <th
                       style={{ color: "var(--neon-cyan)" }}
                       className="text-center"
                     >
-                      ACTIONS
+                      ACCIONES
                     </th>
                   </tr>
                 </thead>
@@ -341,7 +341,7 @@ const Clientes = () => {
           {/* Stats */}
           <div className="mt-3 text-center">
             <small style={{ color: "var(--text-muted)" }}>
-              Showing {filteredClients.length} of {clients.length} clients
+              Mostrando {filteredClients.length} de {clients.length} clientes
             </small>
           </div>
         </Col>
@@ -362,7 +362,7 @@ const Clientes = () => {
           }}
         >
           <Modal.Title style={{ color: "var(--neon-green)" }}>
-            {editingClient ? "EDIT CLIENT" : "NEW CLIENT"}
+            {editingClient ? "EDITAR CLIENTE" : "NUEVO CLIENTE"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: "var(--bg-card)" }}>
@@ -370,27 +370,27 @@ const Clientes = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>First Name *</Form.Label>
+                  <Form.Label>Nombre *</Form.Label>
                   <Form.Control
                     type="text"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleChange}
                     required
-                    placeholder="Enter first name"
+                    placeholder="Ingresa tu nombre"
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Last Name *</Form.Label>
+                  <Form.Label>Apellido *</Form.Label>
                   <Form.Control
                     type="text"
                     name="apellido"
                     value={formData.apellido}
                     onChange={handleChange}
                     required
-                    placeholder="Enter last name"
+                    placeholder="Ingresa tu apellido"
                   />
                 </Form.Group>
               </Col>
@@ -433,10 +433,10 @@ const Clientes = () => {
                   color: "var(--text-muted)",
                 }}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" variant="success" className="btn-success">
-                {editingClient ? "Update Client" : "Create Client"}
+                {editingClient ? "Actualizar Cliente" : "Crear Cliente"}
               </Button>
             </div>
           </Form>

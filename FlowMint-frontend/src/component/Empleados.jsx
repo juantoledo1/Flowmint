@@ -39,7 +39,7 @@ const Empleados = () => {
       setEmployees(data);
       setError("");
     } catch (err) {
-      setError("Failed to load employees. Please try again.");
+      setError("Error al cargar empleados. Por favor, inténtalo de nuevo.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -88,10 +88,10 @@ const Empleados = () => {
     try {
       if (editingEmployee) {
         await employeesAPI.update(editingEmployee.empleado_id, formData);
-        setSuccess("Employee updated successfully!");
+        setSuccess("¡Empleado actualizado exitosamente!");
       } else {
         await employeesAPI.create(formData);
-        setSuccess("Employee created successfully!");
+        setSuccess("¡Empleado creado exitosamente!");
       }
       handleCloseModal();
       loadEmployees();
@@ -99,20 +99,20 @@ const Empleados = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to save employee. Please try again.",
+          "Error al guardar empleado. Por favor, inténtalo de nuevo.",
       );
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this employee?")) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este empleado?")) {
       try {
         await employeesAPI.delete(id);
-        setSuccess("Employee deleted successfully!");
+        setSuccess("¡Empleado eliminado exitosamente!");
         loadEmployees();
         setTimeout(() => setSuccess(""), 3000);
       } catch (err) {
-        setError("Failed to delete employee. Please try again.");
+        setError("Error al eliminar empleado. Por favor, inténtalo de nuevo.");
       }
     }
   };
@@ -134,10 +134,10 @@ const Empleados = () => {
             <Briefcase size={36} style={{ color: "var(--neon-purple)" }} />
             <div>
               <h2 style={{ color: "var(--neon-purple)", marginBottom: "0" }}>
-                EMPLOYEES
+                EMPLEADOS
               </h2>
               <small style={{ color: "var(--text-muted)" }}>
-                Manage your team members
+                Gestiona a tus miembros del equipo
               </small>
             </div>
           </div>
@@ -181,7 +181,7 @@ const Empleados = () => {
             </InputGroup.Text>
             <Form.Control
               type="text"
-              placeholder="Search employees by name or position..."
+              placeholder="Buscar empleados por nombre o posición..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -200,7 +200,7 @@ const Empleados = () => {
             style={{ textTransform: "uppercase", fontWeight: "bold" }}
           >
             <Plus size={20} className="me-2" />
-            Add Employee
+            Agregar Empleado
           </Button>
         </Col>
       </Row>
@@ -213,7 +213,7 @@ const Empleados = () => {
               <div className="text-center p-5">
                 <div className="spinner mx-auto mb-3"></div>
                 <p style={{ color: "var(--text-muted)" }}>
-                  Loading employees...
+                  Cargando empleados...
                 </p>
               </div>
             ) : filteredEmployees.length === 0 ? (
@@ -224,12 +224,12 @@ const Empleados = () => {
                   className="mb-3"
                 />
                 <h4 style={{ color: "var(--text-muted)" }}>
-                  No employees found
+                  No se encontraron empleados
                 </h4>
                 <p style={{ color: "var(--text-muted)" }}>
                   {searchTerm
-                    ? "Try adjusting your search"
-                    : "Start by adding your first employee"}
+                    ? "Intenta ajustar tu búsqueda"
+                    : "Comienza agregando tu primer empleado"}
                 </p>
                 {!searchTerm && (
                   <Button
@@ -238,7 +238,7 @@ const Empleados = () => {
                     className="mt-3"
                   >
                     <Plus size={20} className="me-2" />
-                    Add First Employee
+                    Agregar Primer Empleado
                   </Button>
                 )}
               </div>
@@ -252,13 +252,13 @@ const Empleados = () => {
                 <thead>
                   <tr>
                     <th style={{ color: "var(--neon-cyan)" }}>ID</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>NAME</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>POSITION</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>NOMBRE</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>POSICIÓN</th>
                     <th
                       style={{ color: "var(--neon-cyan)" }}
                       className="text-center"
                     >
-                      ACTIONS
+                      ACCIONES
                     </th>
                   </tr>
                 </thead>
@@ -306,7 +306,7 @@ const Empleados = () => {
                           </Badge>
                         ) : (
                           <small style={{ color: "var(--text-muted)" }}>
-                            No position assigned
+                            Sin posición asignada
                           </small>
                         )}
                       </td>
@@ -345,7 +345,7 @@ const Empleados = () => {
           {/* Stats */}
           <div className="mt-3 text-center">
             <small style={{ color: "var(--text-muted)" }}>
-              Showing {filteredEmployees.length} of {employees.length} employees
+              Mostrando {filteredEmployees.length} de {employees.length} empleados
             </small>
           </div>
         </Col>
@@ -366,7 +366,7 @@ const Empleados = () => {
           }}
         >
           <Modal.Title style={{ color: "var(--neon-purple)" }}>
-            {editingEmployee ? "EDIT EMPLOYEE" : "NEW EMPLOYEE"}
+            {editingEmployee ? "EDITAR EMPLEADO" : "NUEVO EMPLEADO"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: "var(--bg-card)" }}>
@@ -374,27 +374,27 @@ const Empleados = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>First Name *</Form.Label>
+                  <Form.Label>Nombre *</Form.Label>
                   <Form.Control
                     type="text"
                     name="nombre"
                     value={formData.nombre}
                     onChange={handleChange}
                     required
-                    placeholder="Enter first name"
+                    placeholder="Ingresa tu nombre"
                   />
                 </Form.Group>
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Last Name *</Form.Label>
+                  <Form.Label>Apellido *</Form.Label>
                   <Form.Control
                     type="text"
                     name="apellido"
                     value={formData.apellido}
                     onChange={handleChange}
                     required
-                    placeholder="Enter last name"
+                    placeholder="Ingresa tu apellido"
                   />
                 </Form.Group>
               </Col>
@@ -403,17 +403,17 @@ const Empleados = () => {
             <Form.Group className="mb-4">
               <Form.Label>
                 <Briefcase size={16} className="me-2" />
-                Position / Role
+                Posición / Rol
               </Form.Label>
               <Form.Control
                 type="text"
                 name="puesto"
                 value={formData.puesto}
                 onChange={handleChange}
-                placeholder="e.g. Senior Stylist, Barber, Colorist..."
+                placeholder="p. ej. Estilista Senior, Barbero, Colorista..."
               />
               <Form.Text style={{ color: "var(--text-muted)" }}>
-                Optional: Specify the employee's role or position
+                Opcional: Especifica el rol o posición del empleado
               </Form.Text>
             </Form.Group>
 
@@ -426,10 +426,10 @@ const Empleados = () => {
                   color: "var(--text-muted)",
                 }}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" variant="success" className="btn-success">
-                {editingEmployee ? "Update Employee" : "Create Employee"}
+                {editingEmployee ? "Actualizar Empleado" : "Crear Empleado"}
               </Button>
             </div>
           </Form>

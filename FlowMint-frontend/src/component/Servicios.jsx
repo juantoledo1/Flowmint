@@ -48,7 +48,7 @@ const Servicios = () => {
       setServices(data);
       setError("");
     } catch (err) {
-      setError("Failed to load services. Please try again.");
+      setError("Error al cargar servicios. Por favor, inténtalo de nuevo.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -99,12 +99,12 @@ const Servicios = () => {
 
     // Validation
     if (parseFloat(formData.precio) <= 0) {
-      setError("Price must be greater than 0");
+      setError("El precio debe ser mayor a 0");
       return;
     }
 
     if (parseInt(formData.duracion) <= 0) {
-      setError("Duration must be greater than 0");
+      setError("La duración debe ser mayor a 0");
       return;
     }
 
@@ -117,10 +117,10 @@ const Servicios = () => {
 
       if (editingService) {
         await servicesAPI.update(editingService.servicio_id, serviceData);
-        setSuccess("Service updated successfully!");
+        setSuccess("¡Servicio actualizado exitosamente!");
       } else {
         await servicesAPI.create(serviceData);
-        setSuccess("Service created successfully!");
+        setSuccess("¡Servicio creado exitosamente!");
       }
       handleCloseModal();
       loadServices();
@@ -128,20 +128,20 @@ const Servicios = () => {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          "Failed to save service. Please try again.",
+          "Error al guardar servicio. Por favor, inténtalo de nuevo.",
       );
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this service?")) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este servicio?")) {
       try {
         await servicesAPI.delete(id);
-        setSuccess("Service deleted successfully!");
+        setSuccess("¡Servicio eliminado exitosamente!");
         loadServices();
         setTimeout(() => setSuccess(""), 3000);
       } catch (err) {
-        setError("Failed to delete service. Please try again.");
+        setError("Error al eliminar servicio. Por favor, inténtalo de nuevo.");
       }
     }
   };
@@ -162,10 +162,10 @@ const Servicios = () => {
             <Scissors size={36} style={{ color: "var(--neon-pink)" }} />
             <div>
               <h2 style={{ color: "var(--neon-pink)", marginBottom: "0" }}>
-                SERVICES
+                SERVICIOS
               </h2>
               <small style={{ color: "var(--text-muted)" }}>
-                Manage your service catalog
+                Gestiona tu catálogo de servicios
               </small>
             </div>
           </div>
@@ -209,7 +209,7 @@ const Servicios = () => {
             </InputGroup.Text>
             <Form.Control
               type="text"
-              placeholder="Search services by name or description..."
+              placeholder="Buscar servicios por nombre o descripción..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{
@@ -228,7 +228,7 @@ const Servicios = () => {
             style={{ textTransform: "uppercase", fontWeight: "bold" }}
           >
             <Plus size={20} className="me-2" />
-            Add Service
+            Agregar Servicio
           </Button>
         </Col>
       </Row>
@@ -241,7 +241,7 @@ const Servicios = () => {
               <div className="text-center p-5">
                 <div className="spinner mx-auto mb-3"></div>
                 <p style={{ color: "var(--text-muted)" }}>
-                  Loading services...
+                  Cargando servicios...
                 </p>
               </div>
             ) : filteredServices.length === 0 ? (
@@ -252,12 +252,12 @@ const Servicios = () => {
                   className="mb-3"
                 />
                 <h4 style={{ color: "var(--text-muted)" }}>
-                  No services found
+                  No se encontraron servicios
                 </h4>
                 <p style={{ color: "var(--text-muted)" }}>
                   {searchTerm
-                    ? "Try adjusting your search"
-                    : "Start by adding your first service"}
+                    ? "Intenta ajustar tu búsqueda"
+                    : "Comienza agregando tu primer servicio"}
                 </p>
                 {!searchTerm && (
                   <Button
@@ -266,7 +266,7 @@ const Servicios = () => {
                     className="mt-3"
                   >
                     <Plus size={20} className="me-2" />
-                    Add First Service
+                    Agregar Primer Servicio
                   </Button>
                 )}
               </div>
@@ -280,14 +280,14 @@ const Servicios = () => {
                 <thead>
                   <tr>
                     <th style={{ color: "var(--neon-cyan)" }}>ID</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>SERVICE</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>PRICE</th>
-                    <th style={{ color: "var(--neon-cyan)" }}>DURATION</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>SERVICIO</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>PRECIO</th>
+                    <th style={{ color: "var(--neon-cyan)" }}>DURACIÓN</th>
                     <th
                       style={{ color: "var(--neon-cyan)" }}
                       className="text-center"
                     >
-                      ACTIONS
+                      ACCIONES
                     </th>
                   </tr>
                 </thead>
@@ -381,7 +381,7 @@ const Servicios = () => {
           {/* Stats */}
           <div className="mt-3 text-center">
             <small style={{ color: "var(--text-muted)" }}>
-              Showing {filteredServices.length} of {services.length} services
+              Mostrando {filteredServices.length} de {services.length} servicios
             </small>
           </div>
         </Col>
@@ -402,32 +402,32 @@ const Servicios = () => {
           }}
         >
           <Modal.Title style={{ color: "var(--neon-pink)" }}>
-            {editingService ? "EDIT SERVICE" : "NEW SERVICE"}
+            {editingService ? "EDITAR SERVICIO" : "NUEVO SERVICIO"}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: "var(--bg-card)" }}>
           <Form onSubmit={handleSubmit}>
             <Form.Group className="mb-3">
-              <Form.Label>Service Name *</Form.Label>
+              <Form.Label>Nombre del Servicio *</Form.Label>
               <Form.Control
                 type="text"
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
                 required
-                placeholder="e.g. Haircut, Massage, Consultation..."
+                placeholder="p. ej. Corte de pelo, Masaje, Consulta..."
               />
             </Form.Group>
 
             <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
+              <Form.Label>Descripción</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={3}
                 name="descripcion"
                 value={formData.descripcion}
                 onChange={handleChange}
-                placeholder="Describe the service (optional)"
+                placeholder="Describe el servicio (opcional)"
               />
             </Form.Group>
 
@@ -436,7 +436,7 @@ const Servicios = () => {
                 <Form.Group className="mb-4">
                   <Form.Label>
                     <DollarSign size={16} className="me-2" />
-                    Price *
+                    Precio *
                   </Form.Label>
                   <InputGroup>
                     <InputGroup.Text
@@ -465,7 +465,7 @@ const Servicios = () => {
                 <Form.Group className="mb-4">
                   <Form.Label>
                     <Clock size={16} className="me-2" />
-                    Duration *
+                    Duración *
                   </Form.Label>
                   <InputGroup>
                     <Form.Control
@@ -488,7 +488,7 @@ const Servicios = () => {
                     </InputGroup.Text>
                   </InputGroup>
                   <Form.Text style={{ color: "var(--text-muted)" }}>
-                    Service duration in minutes
+                    Duración del servicio en minutos
                   </Form.Text>
                 </Form.Group>
               </Col>
@@ -503,10 +503,10 @@ const Servicios = () => {
                   color: "var(--text-muted)",
                 }}
               >
-                Cancel
+                Cancelar
               </Button>
               <Button type="submit" variant="success" className="btn-success">
-                {editingService ? "Update Service" : "Create Service"}
+                {editingService ? "Actualizar Servicio" : "Crear Servicio"}
               </Button>
             </div>
           </Form>
