@@ -21,7 +21,7 @@ const AIChat = ({ show, onHide }) => {
   const [messages, setMessages] = useState([
     {
       id: 1,
-      text: "Hello! I'm FlowMint AI Assistant. I can help you with:\n\n• Managing appointments\n• Client information\n• Employee schedules\n• Service details\n• Revenue reports\n\nHow can I assist you today?",
+      text: "¡Hola! Soy el Asistente AI de FlowMint. Puedo ayudarte con:\n\n• Gestionar turnos\n• Información de clientes\n• Horarios de empleados\n• Detalles de servicios\n• Reportes de ganancias\n\n¿En qué puedo ayudarte hoy?",
       sender: "bot",
       timestamp: new Date(),
     },
@@ -46,57 +46,63 @@ const AIChat = ({ show, onHide }) => {
     if (
       lowerMessage.includes("appointment") ||
       lowerMessage.includes("turno") ||
-      lowerMessage.includes("booking")
+      lowerMessage.includes("booking") ||
+      lowerMessage.includes("cita") ||
+      lowerMessage.includes("reserva")
     ) {
-      return "To manage appointments, go to the Appointments section. You can:\n\n• View all scheduled appointments\n• Create new appointments\n• Update existing bookings\n• Cancel or reschedule appointments\n\nWould you like help with anything specific?";
+      return "Para gestionar turnos, ve a la sección de Turnos. Puedes:\n\n• Ver todos los turnos programados\n• Crear nuevos turnos\n• Actualizar reservas existentes\n• Cancelar o reprogramar turnos\n\n¿Te gustaría ayuda con algo específico?";
     } else if (
       lowerMessage.includes("client") ||
       lowerMessage.includes("cliente") ||
-      lowerMessage.includes("customer")
+      lowerMessage.includes("customer") ||
+      lowerMessage.includes("cliente")
     ) {
-      return "In the Clients section, you can:\n\n• View all registered clients\n• Add new clients with their contact information\n• Update client details\n• Search clients by name, email, or phone\n\nIs there a specific client operation you need help with?";
+      return "En la sección de Clientes, puedes:\n\n• Ver todos los clientes registrados\n• Agregar nuevos clientes con su información de contacto\n• Actualizar detalles del cliente\n• Buscar clientes por nombre, email o teléfono\n\n¿Hay alguna operación específica de cliente que necesites ayuda?";
     } else if (
       lowerMessage.includes("employee") ||
       lowerMessage.includes("empleado") ||
-      lowerMessage.includes("staff")
+      lowerMessage.includes("staff") ||
+      lowerMessage.includes("trabajador")
     ) {
-      return "The Employees section allows you to:\n\n• Manage your team members\n• Add new employees\n• Update employee information\n• Assign roles and positions\n\nWhat would you like to know about employee management?";
+      return "La sección de Empleados te permite:\n\n• Gestionar a tus miembros del equipo\n• Agregar nuevos empleados\n• Actualizar la información del empleado\n• Asignar roles y posiciones\n\n¿Qué te gustaría saber sobre la gestión de empleados?";
     } else if (
       lowerMessage.includes("service") ||
       lowerMessage.includes("servicio")
     ) {
-      return "In the Services section, you can:\n\n• View all available services\n• Add new services with pricing and duration\n• Update service details\n• Remove services that are no longer offered\n\nDo you need help managing your services?";
+      return "En la sección de Servicios, puedes:\n\n• Ver todos los servicios disponibles\n• Agregar nuevos servicios con precios y duración\n• Actualizar detalles del servicio\n• Eliminar servicios que ya no se ofrecen\n\n¿Necesitas ayuda para gestionar tus servicios?";
     } else if (
       lowerMessage.includes("revenue") ||
       lowerMessage.includes("ganancia") ||
       lowerMessage.includes("money") ||
-      lowerMessage.includes("profit")
+      lowerMessage.includes("profit") ||
+      lowerMessage.includes("ingresos") ||
+      lowerMessage.includes("facturación")
     ) {
-      return "The Revenue section provides:\n\n• Financial overview and statistics\n• Total revenue calculations\n• Service-based income breakdown\n• Date range filtering\n\nWould you like to know more about revenue tracking?";
+      return "La sección de Ganancias proporciona:\n\n• Resumen financiero y estadísticas\n• Cálculos de ganancias totales\n• Desglose de ingresos por servicio\n• Filtrado por rango de fechas\n\n¿Te gustaría saber más sobre el seguimiento de ganancias?";
     } else if (
       lowerMessage.includes("help") ||
       lowerMessage.includes("ayuda") ||
       lowerMessage.includes("?")
     ) {
-      return "I'm here to help! Here are the main features:\n\n📅 **Appointments** - Schedule and manage bookings\n👥 **Clients** - Manage customer database\n👨‍💼 **Employees** - Team management\n✂️ **Services** - Service catalog\n💰 **Revenue** - Financial reports\n👤 **Users** - System user management\n\nWhat would you like to explore?";
+      return "¡Estoy aquí para ayudarte! Aquí están las características principales:\n\n📅 **Turnos** - Programar y gestionar reservas\n👥 **Clientes** - Gestionar base de datos de clientes\n👨‍💼 **Empleados** - Gestión de equipo\n✂️ **Servicios** - Catálogo de servicios\n💰 **Ganancias** - Reportes financieros\n👤 **Usuarios** - Gestión de usuarios del sistema\n\n¿Qué te gustaría explorar?";
     } else if (
       lowerMessage.includes("how") ||
       lowerMessage.includes("cómo") ||
       lowerMessage.includes("como")
     ) {
-      return "I can guide you through:\n\n1. **Creating appointments** - Select a client, choose a service, pick an employee, and set date/time\n2. **Adding clients** - Fill in name, email, and phone number\n3. **Managing services** - Set service name, price, and duration\n4. **Viewing reports** - Filter by date range to see revenue\n\nWhich process would you like help with?";
+      return "Puedo guiarte a través de:\n\n1. **Crear turnos** - Selecciona un cliente, elige un servicio, elige un empleado y establece fecha/hora\n2. **Agregar clientes** - Completa nombre, email y número de teléfono\n3. **Gestionar servicios** - Establece nombre del servicio, precio y duración\n4. **Ver reportes** - Filtrar por rango de fechas para ver ganancias\n\n¿Con qué proceso te gustaría ayuda?";
     } else if (
       lowerMessage.includes("thanks") ||
       lowerMessage.includes("thank") ||
       lowerMessage.includes("gracias")
     ) {
-      return "You're welcome! Feel free to ask if you need anything else. I'm always here to help! 😊";
-    } else if (lowerMessage.includes("hello") || lowerMessage.includes("hi")) {
-      return "Hello! 👋 How can I assist you with FlowMint today?";
+      return "¡De nada! No dudes en preguntar si necesitas algo más. ¡Estoy siempre aquí para ayudarte! 😊";
+    } else if (lowerMessage.includes("hello") || lowerMessage.includes("hi") || lowerMessage.includes("hola")) {
+      return "¡Hola! 👋 ¿Cómo puedo ayudarte con FlowMint hoy?";
     } else {
-      return "I understand you're asking about: \"" +
+      return "Entiendo que estás preguntando sobre: \"" +
         userMessage +
-        "\"\n\nCould you provide more details? I can help with:\n\n• Appointments management\n• Client operations\n• Employee information\n• Service catalog\n• Revenue reports\n\nPlease specify what you need assistance with!";
+        "\"\n\n¿Podrías proporcionar más detalles? Puedo ayudarte con:\n\n• Gestión de turnos\n• Operaciones de clientes\n• Información de empleados\n• Catálogo de servicios\n• Reportes de ganancias\n\n¡Por favor, especifica en qué necesitas ayuda!";
     }
   };
 
@@ -133,11 +139,11 @@ const AIChat = ({ show, onHide }) => {
   };
 
   const handleClearChat = () => {
-    if (window.confirm("Are you sure you want to clear the chat history?")) {
+    if (window.confirm("¿Estás seguro de que deseas borrar el historial de chat?")) {
       setMessages([
         {
           id: 1,
-          text: "Chat cleared! How can I help you?",
+          text: "¡Chat borrado! ¿Cómo puedo ayudarte?",
           sender: "bot",
           timestamp: new Date(),
         },
@@ -146,17 +152,17 @@ const AIChat = ({ show, onHide }) => {
   };
 
   const formatTime = (date) => {
-    return new Date(date).toLocaleTimeString("en-US", {
+    return new Date(date).toLocaleTimeString("es-AR", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
   const quickActions = [
-    { text: "How do I create an appointment?", icon: "📅" },
-    { text: "Show me client management", icon: "👥" },
-    { text: "Explain revenue reports", icon: "💰" },
-    { text: "Help with services", icon: "✂️" },
+    { text: "¿Cómo creo un turno?", icon: "📅" },
+    { text: "Mostrar gestión de clientes", icon: "👥" },
+    { text: "Explicar reportes de ganancias", icon: "💰" },
+    { text: "Ayuda con servicios", icon: "✂️" },
   ];
 
   return (
@@ -360,7 +366,7 @@ const AIChat = ({ show, onHide }) => {
                     style={{ width: "8px", height: "8px" }}
                   ></div>
                   <span style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>
-                    AI is thinking...
+                    El AI está pensando...
                   </span>
                 </div>
               </div>
@@ -381,7 +387,7 @@ const AIChat = ({ show, onHide }) => {
                 letterSpacing: "1px",
               }}
             >
-              Quick Actions
+              Acciones Rápidas
             </small>
             <div className="d-flex flex-wrap gap-2 mt-2">
               {quickActions.map((action, index) => (
@@ -420,7 +426,7 @@ const AIChat = ({ show, onHide }) => {
           <InputGroup>
             <Form.Control
               type="text"
-              placeholder="Type your message here..."
+              placeholder="Escribe tu mensaje aquí..."
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
               disabled={isTyping}
@@ -451,7 +457,7 @@ const AIChat = ({ show, onHide }) => {
               style={{ color: "var(--neon-yellow)" }}
             />
             <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-              Powered by AI - Ask me anything about FlowMint
+              Potenciado por AI - Pregúntame cualquier cosa sobre FlowMint
             </small>
           </div>
         </Form>

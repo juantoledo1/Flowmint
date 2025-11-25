@@ -49,43 +49,43 @@ const Dashboard = () => {
     {
       path: "/dashboard",
       icon: Zap,
-      label: "Dashboard",
+      label: "Panel",
       color: "var(--neon-cyan)",
     },
     {
       path: "/dashboard/turnos",
       icon: Calendar,
-      label: "Appointments",
+      label: "Turnos",
       color: "var(--neon-cyan)",
     },
     {
       path: "/dashboard/clientes",
       icon: Users,
-      label: "Clients",
+      label: "Clientes",
       color: "var(--neon-green)",
     },
     {
       path: "/dashboard/empleados",
       icon: Briefcase,
-      label: "Employees",
+      label: "Empleados",
       color: "var(--neon-purple)",
     },
     {
       path: "/dashboard/servicios",
       icon: Scissors,
-      label: "Services",
+      label: "Servicios",
       color: "var(--neon-pink)",
     },
     {
       path: "/dashboard/usuarios",
       icon: User,
-      label: "Users",
+      label: "Usuarios",
       color: "var(--neon-yellow)",
     },
     {
       path: "/dashboard/ganancias",
       icon: DollarSign,
-      label: "Revenue",
+      label: "Ganancias",
       color: "var(--neon-orange)",
     },
   ];
@@ -216,7 +216,7 @@ const Dashboard = () => {
           }}
         >
           <MessageSquare size={20} />
-          AI Assistant
+          Asistente AI
         </Button>
       </div>
 
@@ -238,7 +238,7 @@ const Dashboard = () => {
           }}
         >
           <LogOut size={20} />
-          Logout
+          Cerrar Sesión
         </Button>
       </div>
     </div>
@@ -337,7 +337,7 @@ const Dashboard = () => {
                 }}
               >
                 <MessageSquare size={16} />
-                AI Chat
+                Chat AI
               </Button>
 
               {user && (

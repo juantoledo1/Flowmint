@@ -39,7 +39,7 @@ const Login = () => {
       }
     } catch (err) {
       setError(
-        err.response?.data?.message || "Invalid credentials. Please try again.",
+        err.response?.data?.message || "Credenciales inválidas. Por favor, inténtalo de nuevo.",
       );
       setCredentials({ ...credentials, pass: "" });
     } finally {
@@ -71,7 +71,7 @@ const Login = () => {
           </motion.div>
           <h1 className="mt-3 mb-1">FlowMint</h1>
           <p style={{ color: "var(--text-secondary)" }}>
-            Professional Business Management Platform
+            Plataforma Profesional de Gestión de Negocios
           </p>
         </div>
 
@@ -95,7 +95,7 @@ const Login = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              Username
+              Usuario
             </label>
             <input
               type="text"
@@ -103,13 +103,13 @@ const Login = () => {
               name="user"
               value={credentials.user}
               onChange={handleChange}
-              placeholder="Enter your username"
+              placeholder="Ingresa tu nombre de usuario"
               required
               autoComplete="username"
               disabled={loading}
             />
             <small style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-              Try demo: admin / admin123 or usuario / user123
+              Prueba demo: admin / admin123 o usuario / user123
             </small>
           </div>
 
@@ -119,7 +119,7 @@ const Login = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              Password
+              Contraseña
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -128,7 +128,7 @@ const Login = () => {
                 name="pass"
                 value={credentials.pass}
                 onChange={handleChange}
-                placeholder="Enter your password"
+                placeholder="Ingresa tu contraseña"
                 required
                 autoComplete="current-password"
                 disabled={loading}
@@ -172,7 +172,7 @@ const Login = () => {
                     verticalAlign: "middle",
                   }}
                 ></div>
-                Logging in...
+                Iniciando sesión...
               </>
             ) : (
               <>
@@ -180,7 +180,7 @@ const Login = () => {
                   size={18}
                   style={{ marginRight: "8px", verticalAlign: "middle" }}
                 />
-                Login
+                Iniciar Sesión
               </>
             )}
           </button>
@@ -195,9 +195,9 @@ const Login = () => {
           }}
         >
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Don't have an account?{" "}
+            ¿No tienes una cuenta?{" "}
             <Link to="/registros" style={{ color: "var(--neon-green)" }}>
-              Sign up
+              Regístrate
             </Link>
           </p>
         </div>
@@ -205,7 +205,7 @@ const Login = () => {
         {/* Version Info */}
         <div className="text-center mt-3">
           <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-            FlowMint v1.0.0 - Enterprise-grade appointment & business management
+            FlowMint v1.0.0 - Gestión de turnos y negocios a nivel empresarial
           </small>
         </div>
       </motion.div>

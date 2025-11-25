@@ -19,20 +19,20 @@ const Home = () => {
   const features = [
     {
       icon: Calendar,
-      title: "Smart Scheduling",
-      description: "Streamline bookings for any service-based business",
+      title: "Agendamiento Inteligente",
+      description: "Optimiza las reservas para cualquier negocio basado en servicios",
       color: "var(--neon-cyan)",
     },
     {
       icon: Users,
-      title: "Client Management",
-      description: "Organize and manage your customer database",
+      title: "Gestión de Clientes",
+      description: "Organiza y gestiona tu base de datos de clientes",
       color: "var(--neon-green)",
     },
     {
       icon: Sparkles,
-      title: "AI Assistant",
-      description: "24/7 intelligent support for your operations",
+      title: "Asistente AI",
+      description: "Soporte inteligente 24/7 para tus operaciones",
       color: "var(--neon-pink)",
     },
   ];
@@ -98,13 +98,13 @@ const Home = () => {
                   lineHeight: "1.6",
                 }}
               >
-                Professional appointment management system for any business.
-                Manage{" "}
-                <span style={{ color: "var(--neon-green)" }}>clients</span>,{" "}
-                <span style={{ color: "var(--neon-cyan)" }}>appointments</span>,{" "}
-                <span style={{ color: "var(--neon-pink)" }}>services</span>, and{" "}
-                <span style={{ color: "var(--neon-yellow)" }}>revenue</span> all
-                in one place.
+                Sistema profesional de gestión de turnos para cualquier negocio.
+                Gestiona{" "}
+                <span style={{ color: "var(--neon-green)" }}>clientes</span>,{" "}
+                <span style={{ color: "var(--neon-cyan)" }}>turnos</span>,{" "}
+                <span style={{ color: "var(--neon-pink)" }}>servicios</span> y{" "}
+                <span style={{ color: "var(--neon-yellow)" }}>ganancias</span> en
+                un solo lugar.
               </p>
 
               {/* CTA Buttons */}
@@ -123,7 +123,7 @@ const Home = () => {
                   }}
                 >
                   <LogIn size={20} />
-                  Sign In
+                  Iniciar Sesión
                 </Button>
                 <Button
                   as={Link}
@@ -139,7 +139,7 @@ const Home = () => {
                   }}
                 >
                   <UserPlus size={20} />
-                  Get Started
+                  Comenzar
                 </Button>
               </div>
 
@@ -157,7 +157,7 @@ const Home = () => {
                       Easy
                     </h3>
                     <small style={{ color: "var(--text-muted)" }}>
-                      Setup & Use
+                      Configuración & Uso
                     </small>
                   </div>
                 </Col>
@@ -173,7 +173,7 @@ const Home = () => {
                       Multi
                     </h3>
                     <small style={{ color: "var(--text-muted)" }}>
-                      Industry Ready
+                      Listo para la Industria
                     </small>
                   </div>
                 </Col>
@@ -189,7 +189,7 @@ const Home = () => {
                       24/7
                     </h3>
                     <small style={{ color: "var(--text-muted)" }}>
-                      AI Assistance
+                      Asistencia AI
                     </small>
                   </div>
                 </Col>
@@ -277,12 +277,11 @@ const Home = () => {
       >
         <Container>
           <p style={{ color: "var(--text-muted)", marginBottom: "0.5rem" }}>
-            FlowMint v1.0.0 - Professional Appointment & Business Management
-            System
+            FlowMint v1.0.0 - Sistema Profesional de Gestión de Turnos y Negocios
           </p>
           <small style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>
-            Perfect for salons, spas, clinics, consultants, and any
-            service-based business
+            Perfecto para salones, spas, clínicas, consultores y cualquier
+            negocio basado en servicios
           </small>
         </Container>
       </footer>

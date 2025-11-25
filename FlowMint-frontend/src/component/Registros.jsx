@@ -45,7 +45,7 @@ const Registros = () => {
 
     // Basic validation
     if (formData.pass.length < 6) {
-      setError("Password must be at least 6 characters long");
+      setError("La contraseña debe tener al menos 6 caracteres");
       setLoading(false);
       return;
     }
@@ -77,7 +77,7 @@ const Registros = () => {
 
   const handleGoogleSignup = () => {
     alert(
-      "Google Sign-up integration coming soon! For now, please use the regular registration form.",
+      "¡Integración de registro con Google próximamente! Por ahora, por favor usa el formulario de registro regular.",
     );
   };
 
@@ -105,7 +105,7 @@ const Registros = () => {
           </motion.div>
           <h1 className="mt-3 mb-1">FlowMint</h1>
           <p style={{ color: "var(--text-secondary)" }}>
-            Start managing your business efficiently
+            Comienza a gestionar tu negocio eficientemente
           </p>
         </div>
 
@@ -159,7 +159,7 @@ const Registros = () => {
             <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          Continue with Google
+          Continuar con Google
         </button>
 
         <div
@@ -181,7 +181,7 @@ const Registros = () => {
               letterSpacing: "1px",
             }}
           >
-            Or sign up with email
+            O regístrate con email
           </span>
           <div
             style={{
@@ -205,7 +205,7 @@ const Registros = () => {
                   size={16}
                   style={{ marginRight: "8px", verticalAlign: "middle" }}
                 />
-                First Name *
+                Nombre *
               </label>
               <input
                 type="text"
@@ -213,7 +213,7 @@ const Registros = () => {
                 name="nombre"
                 value={formData.nombre}
                 onChange={handleChange}
-                placeholder="Enter first name"
+                placeholder="Ingresa tu nombre"
                 required
                 disabled={loading}
               />
@@ -224,7 +224,7 @@ const Registros = () => {
                   size={16}
                   style={{ marginRight: "8px", verticalAlign: "middle" }}
                 />
-                Last Name *
+                Apellido *
               </label>
               <input
                 type="text"
@@ -232,7 +232,7 @@ const Registros = () => {
                 name="apellido"
                 value={formData.apellido}
                 onChange={handleChange}
-                placeholder="Enter last name"
+                placeholder="Ingresa tu apellido"
                 required
                 disabled={loading}
               />
@@ -245,7 +245,7 @@ const Registros = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              ID Number
+              Número de DNI
             </label>
             <input
               type="text"
@@ -253,7 +253,7 @@ const Registros = () => {
               name="dni"
               value={formData.dni}
               onChange={handleChange}
-              placeholder="Enter your ID number (optional)"
+              placeholder="Ingresa tu número de DNI (opcional)"
               disabled={loading}
             />
           </div>
@@ -264,7 +264,7 @@ const Registros = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              Username *
+              Nombre de Usuario *
             </label>
             <input
               type="text"
@@ -272,7 +272,7 @@ const Registros = () => {
               name="user"
               value={formData.user}
               onChange={handleChange}
-              placeholder="Choose a username"
+              placeholder="Elige un nombre de usuario"
               required
               autoComplete="username"
               disabled={loading}
@@ -285,7 +285,7 @@ const Registros = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              Email *
+              Correo Electrónico *
             </label>
             <input
               type="email"
@@ -293,7 +293,7 @@ const Registros = () => {
               name="correo"
               value={formData.correo}
               onChange={handleChange}
-              placeholder="your@email.com"
+              placeholder="tu@email.com"
               required
               autoComplete="email"
               disabled={loading}
@@ -306,7 +306,7 @@ const Registros = () => {
                 size={16}
                 style={{ marginRight: "8px", verticalAlign: "middle" }}
               />
-              Password *
+              Contraseña *
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -315,7 +315,7 @@ const Registros = () => {
                 name="pass"
                 value={formData.pass}
                 onChange={handleChange}
-                placeholder="Minimum 6 characters"
+                placeholder="Mínimo 6 caracteres"
                 required
                 autoComplete="new-password"
                 disabled={loading}
@@ -340,7 +340,7 @@ const Registros = () => {
               </button>
             </div>
             <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-              Must be at least 6 characters
+              Debe tener al menos 6 caracteres
             </small>
           </div>
 
@@ -362,7 +362,7 @@ const Registros = () => {
                     verticalAlign: "middle",
                   }}
                 ></div>
-                Creating Account...
+                Creando Cuenta...
               </>
             ) : (
               <>
@@ -370,7 +370,7 @@ const Registros = () => {
                   size={18}
                   style={{ marginRight: "8px", verticalAlign: "middle" }}
                 />
-                Create Account
+                Crear Cuenta
               </>
             )}
           </button>
@@ -385,9 +385,9 @@ const Registros = () => {
           }}
         >
           <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem" }}>
-            Already have an account?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link to="/login" style={{ color: "var(--neon-green)" }}>
-              Sign in
+              Iniciar sesión
             </Link>
           </p>
         </div>
@@ -395,8 +395,8 @@ const Registros = () => {
         {/* Version Info */}
         <div className="text-center mt-3">
           <small style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
-            FlowMint v1.0.0 - Professional Business Management for Service
-            Industries
+            FlowMint v1.0.0 - Gestión Profesional de Negocios para
+            Industrias de Servicio
           </small>
         </div>
       </motion.div>
