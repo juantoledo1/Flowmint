@@ -250,5 +250,98 @@ export const appointmentsAPI = {
     },
 };
 
+// Revenue API
+export const revenueAPI = {
+    getDaily: async (startDate, endDate) => {
+        let url = '/ganancias/diarias';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getWeekly: async (startDate, endDate) => {
+        let url = '/ganancias/semanales';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getMonthly: async (startDate, endDate) => {
+        let url = '/ganancias/mensuales';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getYearly: async (startDate, endDate) => {
+        let url = '/ganancias/anuales';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getMonthlyByService: async (startDate, endDate) => {
+        let url = '/ganancias/mensuales-por-servicio';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getYearlyByService: async (startDate, endDate) => {
+        let url = '/ganancias/anuales-por-servicio';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getMonthlyByEmployee: async (startDate, endDate) => {
+        let url = '/ganancias/mensuales-por-empleado';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getYearlyByEmployee: async (startDate, endDate) => {
+        let url = '/ganancias/anuales-por-empleado';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+
+    getSummary: async (startDate, endDate) => {
+        let url = '/ganancias/resumen';
+        const params = [];
+        if (startDate) params.push(`startDate=${startDate}`);
+        if (endDate) params.push(`endDate=${endDate}`);
+        if (params.length > 0) url += '?' + params.join('&');
+        const response = await api.get(url);
+        return response.data;
+    },
+};
+
 // Export default api instance
 export default api;
