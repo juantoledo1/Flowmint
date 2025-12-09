@@ -59,18 +59,21 @@ function DashboardHome() {
             };
           });
 
-        // Calcular ingresos mensuales (simplificado)
+        // Calcular ingresos mensuales (corregido para usar precios reales)
+        const servicios = serviciosResponse.data;
         const ingresosMensuales = turnosResponse.data
           .filter(turno => {
             const fechaTurno = new Date(turno.fecha_hora);
             const mesActual = new Date().getMonth();
             const anioActual = new Date().getFullYear();
-            return fechaTurno.getMonth() === mesActual && fechaTurno.getFullYear() === anioActual;
+            // No contar turnos cancelados para los ingresos
+            return fechaTurno.getMonth() === mesActual && fechaTurno.getFullYear() === anioActual && turno.estado !== 'cancelado';
           })
           .reduce((total, turno) => {
-            // Asumiendo que hay un servicio relacionado con cada turno
-            // En un sistema real, se debería obtener el servicio con los datos del turno
-            return total + 50; // Valor promedio estimado
+            // Encontrar el servicio correspondiente al turno para obtener el precio real
+            const servicio = servicios.find(s => s.servicio_id === turno.servicio_id);
+            const precio = servicio ? servicio.precio : 0;
+            return total + precio;
           }, 0);
 
         setStats({
@@ -101,7 +104,7 @@ function DashboardHome() {
 
   return (
     <Container fluid className="px-4">
-      <h2 className="mb-4 text-cyan">Panel de Control</h2>
+      <h2 className="mb-4 text-neon-purple">Panel de Control</h2>
 
       <Row>
         {/* Total Clientes */}
@@ -181,7 +184,7 @@ function DashboardHome() {
           <Card className="bg-dark text-white border-cyan card-glow">
             <Card.Body>
               <Card.Title className="text-cyan">Próximos Turnos</Card.Title>
-              <Card.Text>
+              <Card.Text as="div">
                 <div className="text-white">
                   {stats.proximosTurnos.length > 0 ? (
                     stats.proximosTurnos.map((turno, index) => (

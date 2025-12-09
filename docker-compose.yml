@@ -8,7 +8,10 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && node dist/src/main"
+    command: npm run start:dev
+    volumes:
+      - ./FlowMint-backend-nestjs:/usr/src/app
+      - /usr/src/app/node_modules
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/flowmint?schema=public
       - JWT_SECRET=super-secret-key-that-should-be-in-a-vault-change-in-production

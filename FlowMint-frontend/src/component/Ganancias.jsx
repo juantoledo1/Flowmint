@@ -117,7 +117,7 @@
 
 //   return (
 //     <Container fluid>
-//       <h1 className="text-center mb-4">Ganancias</h1>
+//       <h1 className="text-center mb-4 text-neon-cyan">Ganancias</h1>
 //       <Row className="mb-4">
 //         <Col xs={12} md={6}>
 //           <Card>
@@ -358,7 +358,7 @@ const Ganancias = () => {
 
   return (
     <Container fluid className="p-4">
-      <h1 className="text-center mb-4">Ganancias</h1>
+      <h1 className="text-center mb-4 text-neon-cyan">Ganancias</h1>
       <Row className="mb-4">
         <Col xs={12} md={6}>
           <Card>

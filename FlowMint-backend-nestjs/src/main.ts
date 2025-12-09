@@ -29,9 +29,6 @@ async function bootstrap() {
       whitelist: true, // Remove properties not defined in DTO
       forbidNonWhitelisted: true, // Throw error if extra properties exist
       transform: true, // Transform types automatically
-      transformOptions: {
-        enableImplicitConversion: true,
-      },
     }),
   );
 

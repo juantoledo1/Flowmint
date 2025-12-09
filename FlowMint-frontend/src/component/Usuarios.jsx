@@ -74,7 +74,7 @@ const Usuarios = () => {
         <>
             <div className="bg-dark text-light vh-100 d-flex align-items-center justify-content-center">
                 <div>
-                    <h2 className='text-center'>Usuarios</h2>
+                    <h2 className='text-center text-neon-green'>Usuarios</h2>
                     <div className="d-grid gap-2 mb-3">
                         <Button variant="info" size="lg" onClick={handleListarUsuariosModal}>Listar Usuarios</Button>
                     </div>
@@ -142,15 +142,21 @@ const Usuarios = () => {
             <Toast
                 show={showToast}
                 onClose={() => setShowToast(false)}
-                className="position-fixed top-0 start-50 translate-middle-x bg-black text-light"
-                style={{ zIndex: 9999 }}
+                className="position-fixed top-0 end-0 m-3 toast-notification"
+                style={{ zIndex: 9999, maxWidth: '400px' }}
                 delay={5000}
                 autohide
             >
-                <Toast.Header closeButton={false}>
-                    <strong className="me-auto">Mensaje</strong>
+                <Toast.Header className="fw-bold">
+                    <strong className="me-auto text-neon-cyan">Mensaje</strong>
+                    <button
+                        type="button"
+                        className="btn-close btn-close-white"
+                        aria-label="Close"
+                        onClick={() => setShowToast(false)}
+                    ></button>
                 </Toast.Header>
-                <Toast.Body>{toastMessage}</Toast.Body>
+                <Toast.Body className="fw-semibold">{toastMessage}</Toast.Body>
             </Toast>
 
             {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}

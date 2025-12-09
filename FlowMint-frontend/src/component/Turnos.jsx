@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Button, Modal, Form, Alert, Toast } from 'react-bootstrap';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import api from '../services/api';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Modal,
+  Form,
+  Alert,
+  Toast,
+} from "react-bootstrap";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import api from "../services/api";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 // Configurar localización en español
-moment.locale('es-ES');
+moment.locale("es-ES");
 const localizer = momentLocalizer(moment);
 
 // Estilos para el calendario
@@ -141,32 +150,34 @@ const Turnos = ({ visible = true }) => {
   const [clientes, setClientes] = useState([]);
   const [empleados, setEmpleados] = useState([]);
   const [servicios, setServicios] = useState([]);
-  const [mensaje, setMensaje] = useState('');
-  const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState("");
+  const [error, setError] = useState("");
   const [showCrearTurnoModal, setShowCrearTurnoModal] = useState(false);
   const [showEditarTurnoModal, setShowEditarTurnoModal] = useState(false);
-  const [showConfirmarEliminarModal, setShowConfirmarEliminarModal] = useState(false);
+  const [showConfirmarEliminarModal, setShowConfirmarEliminarModal] =
+    useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [toastType, setToastType] = useState("success"); // 'success' or 'error'
   const [selectedTurno, setSelectedTurno] = useState(null);
-  const [currentView, setCurrentView] = useState('month'); // Estado para controlar la vista actual
+  const [currentView, setCurrentView] = useState("month"); // Estado para controlar la vista actual
 
   // Estado para el nuevo turno
   const [nuevoTurno, setNuevoTurno] = useState({
-    cliente_id: '',
-    empleado_id: '',
-    servicio_id: '',
-    fecha_hora: '',
-    estado: 'pendiente'
+    cliente_id: "",
+    empleado_id: "",
+    servicio_id: "",
+    fecha_hora: "",
+    estado: "pendiente",
   });
 
   // Estado para el turno a editar
   const [turnoEditando, setTurnoEditando] = useState({
-    turno_id: '',
-    cliente_id: '',
-    empleado_id: '',
-    servicio_id: '',
-    fecha_hora: '',
-    estado: 'pendiente'
+    turno_id: "",
+    cliente_id: "",
+    empleado_id: "",
+    servicio_id: "",
+    fecha_hora: "",
+    estado: "pendiente",
   });
 
   useEffect(() => {
@@ -175,80 +186,130 @@ const Turnos = ({ visible = true }) => {
 
   const cargarDatos = async () => {
     try {
-      const [turnosResponse, clientesResponse, empleadosResponse, serviciosResponse] = await Promise.all([
-        api.get('/turnos'),
-        api.get('/clientes'),
-        api.get('/empleados'),
-        api.get('/servicios')
+      const [
+        turnosResponse,
+        clientesResponse,
+        empleadosResponse,
+        serviciosResponse,
+      ] = await Promise.all([
+        api.get("/turnos"),
+        api.get("/clientes"),
+        api.get("/empleados"),
+        api.get("/servicios"),
       ]);
 
       setTurnos(turnosResponse.data);
       setClientes(clientesResponse.data);
       setEmpleados(empleadosResponse.data);
       setServicios(serviciosResponse.data);
-    } catch (error) {
-      console.error('Error al cargar los datos:', error);
-      setError('Error al cargar los datos');
+    } catch (err) {
+      console.error("Error al cargar los datos:", err);
+      if (err.response?.status === 401) {
+        setMensaje("Su sesión ha expirado. Por favor, inicie sesión de nuevo.");
+        setToastType("error");
+        setShowToast(true);
+      } else {
+        const errorMessage =
+          err.response?.data?.message ||
+          "Error de red al cargar datos. Verifique la conexión con el servidor y que todos los servicios estén funcionando.";
+        setMensaje(errorMessage);
+        setToastType("error");
+        setShowToast(true);
+      }
     }
   };
 
   const [cargando, setCargando] = useState(false); // Estado para mostrar indicador de carga
 
+  const validateTurno = (turno) => {
+    const errors = [];
+    if (!turno.fecha_hora) {
+      errors.push("Debe seleccionar una fecha y hora.");
+    }
+    if (!turno.cliente_id || isNaN(parseInt(turno.cliente_id))) {
+      errors.push("Debe seleccionar un cliente.");
+    }
+    if (!turno.empleado_id || isNaN(parseInt(turno.empleado_id))) {
+      errors.push("Debe seleccionar un empleado.");
+    }
+    if (!turno.servicio_id || isNaN(parseInt(turno.servicio_id))) {
+      errors.push("Debe seleccionar un servicio.");
+    }
+    return errors;
+  };
+
   const handleCrearTurno = async () => {
+    const validationErrors = validateTurno(nuevoTurno);
+    if (validationErrors.length > 0) {
+      setMensaje(validationErrors.join(" "));
+      setToastType("error");
+      setShowToast(true);
+      return;
+    }
+
     try {
       setCargando(true);
-      setError(''); // Limpiar errores anteriores
 
-      // Validar que todos los campos estén completos
-      if (!nuevoTurno.cliente_id || !nuevoTurno.empleado_id || !nuevoTurno.servicio_id || !nuevoTurno.fecha_hora) {
-        setError('Por favor complete todos los campos');
-        return;
-      }
-
-      // Verificar solapamiento de turnos
-      const servicio = servicios.find(s => s.servicio_id == nuevoTurno.servicio_id);
-      const duracion = servicio?.duracion || 60; // minutos
-
-      const fechaHoraInicio = new Date(nuevoTurno.fecha_hora);
-      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + duracion * 60000); // Convertir minutos a milisegundos
-
-      // Verificar si hay solapamiento con algún turno existente para el mismo empleado
-      const haySolapamiento = turnos.some(t => {
-        const turnoInicio = new Date(t.fecha_hora);
-        const turnoFin = new Date(new Date(t.fecha_hora).getTime() + (t.servicio?.duracion || 60) * 60000);
-
-        return (
-          t.empleado_id == nuevoTurno.empleado_id &&
-          fechaHoraInicio < turnoFin &&
-          fechaHoraFin > turnoInicio
+      const fechaMoment = moment(
+        nuevoTurno.fecha_hora,
+        "YYYY-MM-DDTHH:mm",
+        true,
+      );
+      if (!fechaMoment.isValid()) {
+        setMensaje(
+          "El formato de la fecha y hora no es válido. Por favor, utilice el selector o el formato AAAA-MM-DDTHH:mm.",
         );
-      });
-
-      if (haySolapamiento) {
-        setError('El empleado ya tiene un turno en este horario. Por favor, elija otro horario o empleado.');
+        setToastType("error");
+        setShowToast(true);
+        setCargando(false);
         return;
       }
 
-      await api.post('/turnos', nuevoTurno);
-      setMensaje('Turno creado exitosamente');
+      const payload = {
+        cliente_id: parseInt(nuevoTurno.cliente_id),
+        empleado_id: parseInt(nuevoTurno.empleado_id),
+        servicio_id: parseInt(nuevoTurno.servicio_id),
+        fecha_hora: fechaMoment.toISOString(),
+        estado: nuevoTurno.estado,
+      };
+
+      await api.post("/turnos", payload);
+      setMensaje("Turno creado exitosamente");
+      setToastType("success");
       setShowToast(true);
       setShowCrearTurnoModal(false);
       setNuevoTurno({
-        cliente_id: '',
-        empleado_id: '',
-        servicio_id: '',
-        fecha_hora: '',
-        estado: 'pendiente'
+        cliente_id: "",
+        empleado_id: "",
+        servicio_id: "",
+        fecha_hora: "",
+        estado: "pendiente",
       });
-      cargarDatos(); // Recargar datos
+      // Clear toast after a short delay to allow user to see the success message
+      setTimeout(() => setShowToast(false), 3000);
+      cargarDatos();
     } catch (error) {
-      console.error('Error al crear turno:', error);
-      if (error.response?.status === 409) {
-        setError('El empleado ya tiene un turno en este horario. Por favor, elija otro horario o empleado.');
-      } else if (error.response?.status === 400) {
-        setError('Datos inválidos. Por favor verifique la información ingresada.');
+      console.error("Error al crear turno:", error);
+      // Log more specific details to find the validation error
+      console.error("Mensaje del backend:", error.response?.data?.message);
+      console.error(
+        "Respuesta completa del backend:",
+        JSON.stringify(error.response?.data, null, 2),
+      );
+      const errorMessage =
+        error.response?.data?.message || "Error al crear el turno.";
+      if (typeof errorMessage === "string") {
+        setMensaje(errorMessage);
+        setToastType("error");
+        setShowToast(true);
+      } else if (Array.isArray(errorMessage)) {
+        setMensaje(errorMessage.join(", "));
+        setToastType("error");
+        setShowToast(true);
       } else {
-        setError('Error al crear turno. Por favor intente nuevamente.');
+        setMensaje("Ocurrió un error inesperado al crear el turno.");
+        setToastType("error");
+        setShowToast(true);
       }
     } finally {
       setCargando(false);
@@ -256,56 +317,65 @@ const Turnos = ({ visible = true }) => {
   };
 
   const handleActualizarTurno = async () => {
+    const validationErrors = validateTurno(turnoEditando);
+    if (validationErrors.length > 0) {
+      setMensaje(validationErrors.join(" "));
+      setToastType("error");
+      setShowToast(true);
+      return;
+    }
+
     try {
       setCargando(true);
-      setError(''); // Limpiar errores anteriores
 
-      // Obtener el servicio para determinar la duración
-      const servicio = servicios.find(s => s.servicio_id == turnoEditando.servicio_id);
-      const duracion = servicio?.duracion || 60; // minutos
-
-      const fechaHoraInicio = new Date(turnoEditando.fecha_hora);
-      const fechaHoraFin = new Date(fechaHoraInicio.getTime() + duracion * 60000); // Convertir minutos a milisegundos
-
-      // Verificar si hay solapamiento con otros turnos (excluyendo el turno actual que se está editando)
-      const haySolapamiento = turnos.some(t => {
-        if (t.turno_id == turnoEditando.turno_id) return false; // No comparar con el mismo turno que se está editando
-
-        const turnoInicio = new Date(t.fecha_hora);
-        const turnoFin = new Date(new Date(t.fecha_hora).getTime() + (t.servicio?.duracion || 60) * 60000);
-
-        return (
-          t.empleado_id == turnoEditando.empleado_id &&
-          fechaHoraInicio < turnoFin &&
-          fechaHoraFin > turnoInicio
+      const fechaMoment = moment(
+        turnoEditando.fecha_hora,
+        "YYYY-MM-DDTHH:mm",
+        true,
+      );
+      if (!fechaMoment.isValid()) {
+        setMensaje(
+          "El formato de la fecha y hora no es válido. Por favor, utilice el selector o el formato AAAA-MM-DDTHH:mm.",
         );
-      });
-
-      if (haySolapamiento) {
-        setError('El empleado ya tiene un turno en este horario. Por favor, elija otro horario o empleado.');
+        setToastType("error");
+        setShowToast(true);
+        setCargando(false);
         return;
       }
 
-      await api.patch(`/turnos/${turnoEditando.turno_id}`, {
-        cliente_id: turnoEditando.cliente_id,
-        empleado_id: turnoEditando.empleado_id,
-        servicio_id: turnoEditando.servicio_id,
-        fecha_hora: turnoEditando.fecha_hora,
-        estado: turnoEditando.estado
-      });
+      const payload = {
+        cliente_id: parseInt(turnoEditando.cliente_id),
+        empleado_id: parseInt(turnoEditando.empleado_id),
+        servicio_id: parseInt(turnoEditando.servicio_id),
+        fecha_hora: fechaMoment.toISOString(),
+        estado: turnoEditando.estado,
+      };
 
-      setMensaje('Turno actualizado exitosamente');
+      await api.patch(`/turnos/${turnoEditando.turno_id}`, payload);
+
+      setMensaje("Turno actualizado exitosamente");
+      setToastType("success");
       setShowToast(true);
       setShowEditarTurnoModal(false);
-      cargarDatos(); // Recargar datos
+      // Clear toast after a short delay to allow user to see the success message
+      setTimeout(() => setShowToast(false), 3000);
+      cargarDatos();
     } catch (error) {
-      console.error('Error al actualizar turno:', error);
-      if (error.response?.status === 409) {
-        setError('El empleado ya tiene un turno en este horario. Por favor, elija otro horario o empleado.');
-      } else if (error.response?.status === 400) {
-        setError('Datos inválidos. Por favor verifique la información ingresada.');
+      console.error("Error al actualizar turno:", error);
+      const errorMessage =
+        error.response?.data?.message || "Error al actualizar el turno.";
+      if (typeof errorMessage === "string") {
+        setMensaje(errorMessage);
+        setToastType("error");
+        setShowToast(true);
+      } else if (Array.isArray(errorMessage)) {
+        setMensaje(errorMessage.join(", "));
+        setToastType("error");
+        setShowToast(true);
       } else {
-        setError('Error al actualizar turno. Por favor intente nuevamente.');
+        setMensaje("Ocurrió un error inesperado al actualizar el turno.");
+        setToastType("error");
+        setShowToast(true);
       }
     } finally {
       setCargando(false);
@@ -315,71 +385,80 @@ const Turnos = ({ visible = true }) => {
   const handleEliminarTurno = async () => {
     try {
       setCargando(true);
-      setError(''); // Limpiar errores anteriores
+      setError("");
 
       await api.delete(`/turnos/${selectedTurno.turno_id}`);
-      setMensaje('Turno eliminado exitosamente');
+      setMensaje("Turno eliminado exitosamente");
+      setToastType("success");
       setShowToast(true);
       setSelectedTurno(null);
       setShowConfirmarEliminarModal(false);
-      cargarDatos(); // Recargar datos
+      // Clear toast after a short delay to allow user to see the success message
+      setTimeout(() => setShowToast(false), 3000);
+      cargarDatos();
     } catch (error) {
-      console.error('Error al eliminar turno:', error);
-      setError('Error al eliminar turno. Por favor intente nuevamente.');
+      console.error("Error al eliminar turno:", error);
+      setMensaje("Error al eliminar turno. Por favor intente nuevamente.");
+      setToastType("error");
+      setShowToast(true);
     } finally {
       setCargando(false);
     }
   };
 
-  const handleSeleccionarTurno = (turno) => {
+  const handleSeleccionarTurno = (event) => {
+    const turno = event.turno_data;
     setSelectedTurno(turno);
     setTurnoEditando({
       turno_id: turno.turno_id,
       cliente_id: turno.cliente_id,
       empleado_id: turno.empleado_id,
       servicio_id: turno.servicio_id,
-      fecha_hora: turno.fecha_hora,
-      estado: turno.estado
+      fecha_hora: moment(turno.fecha_hora).format("YYYY-MM-DDTHH:mm"),
+      estado: turno.estado,
     });
     setShowEditarTurnoModal(true);
   };
 
   const handleSlotClick = (slotInfo) => {
-    const inicio = moment(slotInfo.start).format('YYYY-MM-DDTHH:mm');
+    const clickedTime = moment(slotInfo.start);
+    const existingEvent = events.find((event) =>
+      clickedTime.isBetween(moment(event.start), moment(event.end), null, "[]"),
+    );
 
-    setNuevoTurno({
-      ...nuevoTurno,
-      fecha_hora: inicio
-    });
-
-    setShowCrearTurnoModal(true);
+    if (existingEvent) {
+      handleSeleccionarTurno(existingEvent);
+    } else {
+      const inicio = clickedTime.format("YYYY-MM-DDTHH:mm");
+      setNuevoTurno({
+        ...nuevoTurno,
+        fecha_hora: inicio,
+      });
+      setShowCrearTurnoModal(true);
+    }
   };
 
-  const handleDateSelect = (slotInfo) => {
-    // Cambiar a la vista diaria cuando se selecciona un día
-    setCurrentView('day');
-    // Si se selecciona un rango, usar el inicio
-    const startDate = moment(slotInfo.start).format('YYYY-MM-DDTHH:mm');
-
-    // Establecer la fecha en el nuevo turno
-    setNuevoTurno({
-      ...nuevoTurno,
-      fecha_hora: startDate
-    });
+  const handleDateSelect = ({ start }) => {
+    setCurrentView("day");
+    const today = moment(start);
+    const firstSlot = today.startOf("day").add(8, "hours");
+    setNuevoTurno((prev) => ({
+      ...prev,
+      fecha_hora: firstSlot.format("YYYY-MM-DDTHH:mm"),
+    }));
   };
 
-  // Mapear turnos a eventos para el calendario
   const events = turnos.map((turno) => {
     const startDate = new Date(turno.fecha_hora);
-    const duracion = turno.servicio?.duracion || 60; // minutos
-    const endDate = new Date(startDate.getTime() + duracion * 60000); // Convertir minutos a milisegundos
+    const duracion = turno.servicio?.duracion || 60;
+    const endDate = new Date(startDate.getTime() + duracion * 60000);
 
     return {
       id: turno.turno_id,
-      title: `${turno.servicio?.nombre || 'Servicio'} con ${turno.cliente?.nombre || 'Cliente'} ${turno.cliente?.apellido || ''}`,
+      title: `${turno.servicio?.nombre || "Servicio"} con ${turno.cliente?.nombre || "Cliente"} ${turno.cliente?.apellido || ""}`,
       start: startDate,
       end: endDate,
-      turno_data: turno
+      turno_data: turno,
     };
   });
 
@@ -396,10 +475,12 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Cliente</Form.Label>
                 <Form.Select
                   value={nuevoTurno.cliente_id}
-                  onChange={(e) => setNuevoTurno({...nuevoTurno, cliente_id: e.target.value})}
+                  onChange={(e) =>
+                    setNuevoTurno({ ...nuevoTurno, cliente_id: e.target.value })
+                  }
                 >
                   <option value="">Seleccione un cliente</option>
-                  {clientes.map(cliente => (
+                  {clientes.map((cliente) => (
                     <option key={cliente.cliente_id} value={cliente.cliente_id}>
                       {cliente.nombre} {cliente.apellido}
                     </option>
@@ -412,11 +493,19 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Empleado</Form.Label>
                 <Form.Select
                   value={nuevoTurno.empleado_id}
-                  onChange={(e) => setNuevoTurno({...nuevoTurno, empleado_id: e.target.value})}
+                  onChange={(e) =>
+                    setNuevoTurno({
+                      ...nuevoTurno,
+                      empleado_id: e.target.value,
+                    })
+                  }
                 >
                   <option value="">Seleccione un empleado</option>
-                  {empleados.map(empleado => (
-                    <option key={empleado.empleado_id} value={empleado.empleado_id}>
+                  {empleados.map((empleado) => (
+                    <option
+                      key={empleado.empleado_id}
+                      value={empleado.empleado_id}
+                    >
                       {empleado.nombre} {empleado.apellido} ({empleado.puesto})
                     </option>
                   ))}
@@ -431,12 +520,21 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Servicio</Form.Label>
                 <Form.Select
                   value={nuevoTurno.servicio_id}
-                  onChange={(e) => setNuevoTurno({...nuevoTurno, servicio_id: e.target.value})}
+                  onChange={(e) =>
+                    setNuevoTurno({
+                      ...nuevoTurno,
+                      servicio_id: e.target.value,
+                    })
+                  }
                 >
                   <option value="">Seleccione un servicio</option>
-                  {servicios.map(servicio => (
-                    <option key={servicio.servicio_id} value={servicio.servicio_id}>
-                      {servicio.nombre} - ${servicio.precio} ({servicio.duracion} min)
+                  {servicios.map((servicio) => (
+                    <option
+                      key={servicio.servicio_id}
+                      value={servicio.servicio_id}
+                    >
+                      {servicio.nombre} - ${servicio.precio} (
+                      {servicio.duracion} min)
                     </option>
                   ))}
                 </Form.Select>
@@ -448,7 +546,9 @@ const Turnos = ({ visible = true }) => {
                 <Form.Control
                   type="datetime-local"
                   value={nuevoTurno.fecha_hora}
-                  onChange={(e) => setNuevoTurno({...nuevoTurno, fecha_hora: e.target.value})}
+                  onChange={(e) =>
+                    setNuevoTurno({ ...nuevoTurno, fecha_hora: e.target.value })
+                  }
                 />
               </Form.Group>
             </Col>
@@ -460,7 +560,9 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Estado</Form.Label>
                 <Form.Select
                   value={nuevoTurno.estado}
-                  onChange={(e) => setNuevoTurno({...nuevoTurno, estado: e.target.value})}
+                  onChange={(e) =>
+                    setNuevoTurno({ ...nuevoTurno, estado: e.target.value })
+                  }
                 >
                   <option value="pendiente">Pendiente</option>
                   <option value="confirmado">Confirmado</option>
@@ -472,11 +574,7 @@ const Turnos = ({ visible = true }) => {
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="secondary"
-          onClick={handleClose}
-          disabled={cargando}
-        >
+        <Button variant="secondary" onClick={handleClose} disabled={cargando}>
           Cancelar
         </Button>
         <Button
@@ -486,10 +584,16 @@ const Turnos = ({ visible = true }) => {
         >
           {cargando ? (
             <>
-              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              {' '}Cargando...
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>{" "}
+              Cargando...
             </>
-          ) : 'Crear Turno'}
+          ) : (
+            "Crear Turno"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -508,10 +612,15 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Cliente</Form.Label>
                 <Form.Select
                   value={turnoEditando.cliente_id}
-                  onChange={(e) => setTurnoEditando({...turnoEditando, cliente_id: e.target.value})}
+                  onChange={(e) =>
+                    setTurnoEditando({
+                      ...turnoEditando,
+                      cliente_id: e.target.value,
+                    })
+                  }
                 >
                   <option value="">Seleccione un cliente</option>
-                  {clientes.map(cliente => (
+                  {clientes.map((cliente) => (
                     <option key={cliente.cliente_id} value={cliente.cliente_id}>
                       {cliente.nombre} {cliente.apellido}
                     </option>
@@ -524,11 +633,19 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Empleado</Form.Label>
                 <Form.Select
                   value={turnoEditando.empleado_id}
-                  onChange={(e) => setTurnoEditando({...turnoEditando, empleado_id: e.target.value})}
+                  onChange={(e) =>
+                    setTurnoEditando({
+                      ...turnoEditando,
+                      empleado_id: e.target.value,
+                    })
+                  }
                 >
                   <option value="">Seleccione un empleado</option>
-                  {empleados.map(empleado => (
-                    <option key={empleado.empleado_id} value={empleado.empleado_id}>
+                  {empleados.map((empleado) => (
+                    <option
+                      key={empleado.empleado_id}
+                      value={empleado.empleado_id}
+                    >
                       {empleado.nombre} {empleado.apellido} ({empleado.puesto})
                     </option>
                   ))}
@@ -543,12 +660,21 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Servicio</Form.Label>
                 <Form.Select
                   value={turnoEditando.servicio_id}
-                  onChange={(e) => setTurnoEditando({...turnoEditando, servicio_id: e.target.value})}
+                  onChange={(e) =>
+                    setTurnoEditando({
+                      ...turnoEditando,
+                      servicio_id: e.target.value,
+                    })
+                  }
                 >
                   <option value="">Seleccione un servicio</option>
-                  {servicios.map(servicio => (
-                    <option key={servicio.servicio_id} value={servicio.servicio_id}>
-                      {servicio.nombre} - ${servicio.precio} ({servicio.duracion} min)
+                  {servicios.map((servicio) => (
+                    <option
+                      key={servicio.servicio_id}
+                      value={servicio.servicio_id}
+                    >
+                      {servicio.nombre} - ${servicio.precio} (
+                      {servicio.duracion} min)
                     </option>
                   ))}
                 </Form.Select>
@@ -559,8 +685,17 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Fecha y Hora</Form.Label>
                 <Form.Control
                   type="datetime-local"
-                  value={turnoEditando.fecha_hora ? turnoEditando.fecha_hora.split('.')[0].substring(0, 16) : ''}
-                  onChange={(e) => setTurnoEditando({...turnoEditando, fecha_hora: e.target.value})}
+                  value={
+                    turnoEditando.fecha_hora
+                      ? turnoEditando.fecha_hora.split(".")[0].substring(0, 16)
+                      : ""
+                  }
+                  onChange={(e) =>
+                    setTurnoEditando({
+                      ...turnoEditando,
+                      fecha_hora: e.target.value,
+                    })
+                  }
                 />
               </Form.Group>
             </Col>
@@ -572,7 +707,12 @@ const Turnos = ({ visible = true }) => {
                 <Form.Label>Estado</Form.Label>
                 <Form.Select
                   value={turnoEditando.estado}
-                  onChange={(e) => setTurnoEditando({...turnoEditando, estado: e.target.value})}
+                  onChange={(e) =>
+                    setTurnoEditando({
+                      ...turnoEditando,
+                      estado: e.target.value,
+                    })
+                  }
                 >
                   <option value="pendiente">Pendiente</option>
                   <option value="confirmado">Confirmado</option>
@@ -585,10 +725,17 @@ const Turnos = ({ visible = true }) => {
       </Modal.Body>
       <Modal.Footer>
         <Button
-          variant="secondary"
-          onClick={handleClose}
+          variant="danger"
+          onClick={() => {
+            setShowEditarTurnoModal(false);
+            setShowConfirmarEliminarModal(true);
+          }}
+          className="me-auto"
           disabled={cargando}
         >
+          Eliminar
+        </Button>
+        <Button variant="secondary" onClick={handleClose} disabled={cargando}>
           Cancelar
         </Button>
         <Button
@@ -598,10 +745,16 @@ const Turnos = ({ visible = true }) => {
         >
           {cargando ? (
             <>
-              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              {' '}Cargando...
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>{" "}
+              Cargando...
             </>
-          ) : 'Actualizar Turno'}
+          ) : (
+            "Actualizar Turno"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -613,34 +766,37 @@ const Turnos = ({ visible = true }) => {
         <Modal.Title>Confirmar Eliminación</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>¿Estás seguro de eliminar este turno?</p>
+        <p>¿Estás seguro de que deseas eliminar este turno?</p>
         {selectedTurno && (
           <p>
-            <strong>Cliente:</strong> {selectedTurno.cliente?.nombre} {selectedTurno.cliente?.apellido}<br />
-            <strong>Servicio:</strong> {selectedTurno.servicio?.nombre}<br />
-            <strong>Fecha y Hora:</strong> {new Date(selectedTurno.fecha_hora).toLocaleString()}<br />
+            <strong>Cliente:</strong> {selectedTurno.cliente?.nombre}{" "}
+            {selectedTurno.cliente?.apellido}
+            <br />
+            <strong>Servicio:</strong> {selectedTurno.servicio?.nombre}
+            <br />
+            <strong>Fecha y Hora:</strong>{" "}
+            {new Date(selectedTurno.fecha_hora).toLocaleString()}
+            <br />
           </p>
         )}
       </Modal.Body>
       <Modal.Footer>
-        <Button
-          variant="secondary"
-          onClick={handleClose}
-          disabled={cargando}
-        >
+        <Button variant="secondary" onClick={handleClose} disabled={cargando}>
           Cancelar
         </Button>
-        <Button
-          variant="danger"
-          onClick={handleEliminar}
-          disabled={cargando}
-        >
+        <Button variant="danger" onClick={handleEliminar} disabled={cargando}>
           {cargando ? (
             <>
-              <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              {' '}Cargando...
+              <span
+                className="spinner-border spinner-border-sm"
+                role="status"
+                aria-hidden="true"
+              ></span>{" "}
+              Cargando...
             </>
-          ) : 'Eliminar'}
+          ) : (
+            "Eliminar"
+          )}
         </Button>
       </Modal.Footer>
     </Modal>
@@ -652,24 +808,37 @@ const Turnos = ({ visible = true }) => {
     <>
       <style>{customStyles}</style>
       <Container fluid className="px-4 py-4">
-        <h2 className="text-cyan mb-4 text-center">Calendario de Turnos</h2>
+        <h2 className="text-neon-cyan mb-4 text-center">
+          Calendario de Turnos
+        </h2>
+
+        {error && (
+          <Alert
+            variant="danger"
+            onClose={() => setError("")}
+            dismissible
+            className="alert-error"
+          >
+            {error}
+          </Alert>
+        )}
 
         <Row>
           <Col xs={12}>
-            <div style={{ height: '600px' }}>
+            <div style={{ height: "600px" }}>
               <Calendar
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
                 endAccessor="end"
-                style={{ height: '100%' }}
+                style={{ height: "100%" }}
                 onSelectEvent={handleSeleccionarTurno}
-                onSelectSlot={currentView === 'day' ? handleSlotClick : handleDateSelect}
+                onSelectSlot={handleSlotClick}
                 selectable
                 defaultView="month"
                 view={currentView}
                 onView={setCurrentView}
-                views={['month', 'week', 'day']}
+                views={["month", "week", "day"]}
                 messages={{
                   date: "Fecha",
                   time: "Hora",
@@ -682,27 +851,30 @@ const Turnos = ({ visible = true }) => {
                   previous: "Anterior",
                   next: "Siguiente",
                   today: "Hoy",
-                  agenda: "Agenda"
+                  agenda: "Agenda",
                 }}
                 eventPropGetter={(event) => ({
                   style: {
-                    backgroundColor: event.turno_data.estado === 'confirmado' ? '#28a745' :
-                                    event.turno_data.estado === 'cancelado' ? '#dc3545' : '#ffc107',
-                    borderRadius: '5px',
-                    border: 'none',
-                    color: 'white',
-                    margin: '1px',
-                    padding: '2px',
-                    fontSize: '0.8rem'
-                  }
+                    backgroundColor:
+                      event.turno_data.estado === "confirmado"
+                        ? "#28a745"
+                        : event.turno_data.estado === "cancelado"
+                          ? "#dc3545"
+                          : "#ffc107",
+                    borderRadius: "5px",
+                    border: "none",
+                    color: "white",
+                    margin: "1px",
+                    padding: "2px",
+                    fontSize: "0.8rem",
+                  },
                 })}
               />
             </div>
           </Col>
         </Row>
       </Container>
-
-      {/* Modales */}
+      {/* Modales */}f
       <ModalCrearTurno
         show={showCrearTurnoModal}
         handleClose={() => setShowCrearTurnoModal(false)}
@@ -716,24 +888,25 @@ const Turnos = ({ visible = true }) => {
         handleClose={() => setShowConfirmarEliminarModal(false)}
         handleEliminar={handleEliminarTurno}
       />
-
-      {/* Mensajes de alerta */}
-      {mensaje && <Alert variant="success" onClose={() => setMensaje('')} dismissible>{mensaje}</Alert>}
-      {error && <Alert variant="danger" onClose={() => setError('')} dismissible>{error}</Alert>}
-
       {/* Toast de notificaciones */}
       <Toast
         show={showToast}
         onClose={() => setShowToast(false)}
-        className="position-fixed top-0 start-50 translate-middle-x bg-black text-light"
-        style={{ zIndex: 9999 }}
+        className={`position-fixed top-0 end-0 m-3 toast-notification ${toastType === "error" ? "bg-danger" : "bg-success"}`}
+        style={{ zIndex: 9999, maxWidth: "400px" }}
         delay={5000}
         autohide
       >
-        <Toast.Header>
-          <strong className="me-auto">Notificación</strong>
+        <Toast.Header className="fw-bold">
+          <strong className="me-auto text-neon-cyan">Notificación</strong>
+          <button
+            type="button"
+            className="btn-close btn-close-white"
+            aria-label="Close"
+            onClick={() => setShowToast(false)}
+          ></button>
         </Toast.Header>
-        <Toast.Body>{mensaje}</Toast.Body>
+        <Toast.Body className="fw-semibold">{mensaje}</Toast.Body>
       </Toast>
     </>
   );

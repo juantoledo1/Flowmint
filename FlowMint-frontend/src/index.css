@@ -537,11 +537,13 @@ tbody tr:hover {
 
 /* Alert / Notification */
 .alert {
-    padding: 1rem 1.5rem;
-    border-radius: var(--radius-md);
-    border: 2px solid;
+    padding: 1.25rem 1.75rem;
+    border-radius: var(--radius-lg);
+    border: 3px solid;
     margin-bottom: var(--spacing-md);
     animation: slideInRight var(--transition-normal);
+    font-size: 1.1rem;
+    font-weight: 600;
 }
 
 @keyframes slideInRight {
@@ -557,26 +559,93 @@ tbody tr:hover {
 
 .alert-success {
     border-color: var(--neon-green);
-    background: rgba(22, 242, 179, 0.1);
+    background: linear-gradient(135deg, rgba(22, 242, 179, 0.2), rgba(22, 242, 179, 0.1));
     color: var(--neon-green);
+    box-shadow: 0 0 15px rgba(22, 242, 179, 0.3);
 }
 
 .alert-error {
     border-color: var(--neon-pink);
-    background: rgba(255, 0, 110, 0.1);
+    background: linear-gradient(135deg, rgba(255, 0, 110, 0.2), rgba(255, 0, 110, 0.1));
     color: var(--neon-pink);
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.3);
 }
 
 .alert-warning {
     border-color: var(--neon-yellow);
-    background: rgba(255, 214, 10, 0.1);
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1));
     color: var(--neon-yellow);
+    box-shadow: 0 0 15px rgba(255, 214, 10, 0.3);
 }
 
 .alert-info {
     border-color: var(--neon-cyan);
-    background: rgba(0, 243, 255, 0.1);
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(0, 243, 255, 0.1));
     color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+}
+
+/* Toast Notifications */
+.toast {
+    border: 3px solid var(--neon-cyan) !important;
+    border-radius: var(--radius-lg) !important;
+    background: rgba(30, 30, 62, 0.95) !important;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.5) !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    min-width: 350px;
+}
+
+.toast-header {
+    background: linear-gradient(180deg, #1e2440 0%, #2a2855 100%) !important;
+    border-bottom: 2px solid var(--neon-cyan) !important;
+    color: var(--text-primary) !important;
+    border-radius: calc(var(--radius-lg) - 3px) calc(var(--radius-lg) - 3px) 0 0 !important;
+    padding: 0.75rem 1rem !important;
+}
+
+.toast-body {
+    color: var(--text-primary) !important;
+    background: transparent !important;
+    padding: 1rem 1.25rem !important;
+    font-size: 1.1rem !important;
+}
+
+/* Toast Notification Variants */
+.toast.bg-success {
+    border-color: var(--neon-green) !important;
+    box-shadow: 0 0 20px rgba(22, 242, 179, 0.5) !important;
+}
+
+.toast.bg-success .toast-header {
+    background: linear-gradient(180deg, rgba(22, 242, 179, 0.2) 0%, rgba(22, 242, 179, 0.1) 100%) !important;
+    border-bottom-color: var(--neon-green) !important;
+    color: var(--neon-green) !important;
+}
+
+.toast.bg-error,
+.toast.bg-danger {
+    border-color: var(--neon-pink) !important;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.5) !important;
+}
+
+.toast.bg-error .toast-header,
+.toast.bg-danger .toast-header {
+    background: linear-gradient(180deg, rgba(255, 0, 110, 0.2) 0%, rgba(255, 0, 110, 0.1) 100%) !important;
+    border-bottom-color: var(--neon-pink) !important;
+    color: var(--neon-pink) !important;
+}
+
+.toast.bg-warning {
+    border-color: var(--neon-yellow) !important;
+    box-shadow: 0 0 20px rgba(255, 214, 10, 0.5) !important;
+}
+
+.toast.bg-warning .toast-header {
+    background: linear-gradient(180deg, rgba(255, 214, 10, 0.2) 0%, rgba(255, 214, 10, 0.1) 100%) !important;
+    border-bottom-color: var(--neon-yellow) !important;
+    color: var(--neon-yellow) !important;
 }
 
 /* Badge */
@@ -618,6 +687,64 @@ tbody tr:hover {
 }
 .text-right {
     text-align: right;
+}
+
+/* Text Colors - Retro Neon Theme */
+.text-neon-cyan {
+    color: var(--neon-cyan) !important;
+}
+
+.text-neon-pink {
+    color: var(--neon-pink) !important;
+}
+
+.text-neon-purple {
+    color: var(--neon-purple) !important;
+}
+
+.text-neon-green {
+    color: var(--neon-green) !important;
+}
+
+.text-neon-yellow {
+    color: var(--neon-yellow) !important;
+}
+
+.text-neon-orange {
+    color: var(--neon-orange) !important;
+}
+
+.text-neon-blue {
+    color: var(--neon-blue) !important;
+}
+
+/* Alternative text color classes */
+.text-cyan {
+    color: var(--neon-cyan) !important;
+}
+
+.text-pink {
+    color: var(--neon-pink) !important;
+}
+
+.text-purple {
+    color: var(--neon-purple) !important;
+}
+
+.text-green {
+    color: var(--neon-green) !important;
+}
+
+.text-yellow {
+    color: var(--neon-yellow) !important;
+}
+
+.text-orange {
+    color: var(--neon-orange) !important;
+}
+
+.text-blue {
+    color: var(--neon-blue) !important;
 }
 
 .mt-1 {
@@ -1040,32 +1167,40 @@ tbody tr:hover {
 
 /* Alerts - Override Bootstrap */
 .alert {
-    border: 2px solid !important;
+    border: 3px solid !important;
     background: transparent !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    padding: 1.25rem 1.75rem !important;
+    border-radius: var(--radius-lg) !important;
 }
 
 .alert-success {
     border-color: var(--neon-green) !important;
-    background: rgba(22, 242, 179, 0.1) !important;
+    background: linear-gradient(135deg, rgba(22, 242, 179, 0.2), rgba(22, 242, 179, 0.1)) !important;
     color: var(--neon-green) !important;
+    box-shadow: 0 0 15px rgba(22, 242, 179, 0.3) !important;
 }
 
 .alert-danger {
     border-color: var(--neon-pink) !important;
-    background: rgba(255, 0, 110, 0.1) !important;
+    background: linear-gradient(135deg, rgba(255, 0, 110, 0.2), rgba(255, 0, 110, 0.1)) !important;
     color: var(--neon-pink) !important;
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.3) !important;
 }
 
 .alert-warning {
     border-color: var(--neon-yellow) !important;
-    background: rgba(255, 214, 10, 0.1) !important;
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.2), rgba(255, 214, 10, 0.1)) !important;
     color: var(--neon-yellow) !important;
+    box-shadow: 0 0 15px rgba(255, 214, 10, 0.3) !important;
 }
 
 .alert-info {
     border-color: var(--neon-cyan) !important;
-    background: rgba(0, 243, 255, 0.1) !important;
+    background: linear-gradient(135deg, rgba(0, 243, 255, 0.2), rgba(0, 243, 255, 0.1)) !important;
     color: var(--neon-cyan) !important;
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3) !important;
 }
 
 /* Nav links */

@@ -174,6 +174,7 @@ const Dashboard = () => {
             key={index}
             to={item.path}
             onClick={onClose}
+            end={item.path === "/dashboard"}  // Solo para el panel, usar coincidencia exacta
             className={({ isActive }) =>
               `nav-link d-flex align-items-center gap-3 p-3 rounded ${isActive ? "active" : ""}`
             }
